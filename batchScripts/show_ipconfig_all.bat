@@ -17,3 +17,5 @@ IPCONFIG
 :: IPCONFIG | findstr IPv4
 
 PAUSE
+
+EXIT
