@@ -19,3 +19,5 @@ ECHO Your name is %q%
 :: Keep window open until any key press
 
 PAUSE
+
+EXIT
