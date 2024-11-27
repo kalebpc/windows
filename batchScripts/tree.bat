@@ -4,21 +4,16 @@
 :: White background with black text
 COLOR f0
 
-ECHO What disc do you want to tree? ex. c ^| d ^| f
-
 :: Get user input
-SET /P disc=
+SET /P disc=What disc do you want to tree? (c ^| d ^| f) ^:
 
-CD %disc%:
+CD %disc%:/
 
-IF %errorlevel% GTR 0 (GOTO showerrors) ELSE (ECHO Enter path to folder. ex. ^/path^/to^/folder)
+IF %errorlevel% NEQ 0 (GOTO showerrors) ELSE (SET /p pathtofolder=Enter path to folder. ^(^/path^/to^/folder^) ^:)
 
-:: Get user input
-SET /P pathtofolder=
+IF NOT DEFINED pathtofolder (ECHO No path defined && GOTO showerrors) ELSE (CD %pathtofolder%/)
 
-IF DEFINED pathtofolder (CD %disc%:%pathtofolder%/) ELSE (CD %disc%:/)
-
-IF %errorlevel% GTR 0 (GOTO showerrors) ELSE (tree)
+IF %errorlevel% NEQ 0 (GOTO showerrors) ELSE (tree)
 
 :showerrors
 
@@ -26,3 +21,5 @@ ECHO %errorlevel% errors encounted.
 
 :: Keep terminal open
 PAUSE
+
+EXIT
