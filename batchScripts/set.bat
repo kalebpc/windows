@@ -6,7 +6,7 @@
 
 ECHO What is your name?
 
-SET /p q=
+SET /P q=
 
 :: Clear terminal
 
