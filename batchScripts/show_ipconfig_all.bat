@@ -14,7 +14,7 @@ ECHO ============================
 
 IPCONFIG
 
-:: IPCONFIG | findstr IPv4
+:: IPCONFIG | FINDSTR IPv4
 
 PAUSE
 
