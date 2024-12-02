@@ -19,10 +19,9 @@ SETLOCAL
 
 :: SET /? for help and DOS string extraction for ":~start,end"
 
-SET drive=%CD:~0,1%
+SET drive=%HOMEDRIVE:~0,1%
 
-:: ********\/\/\/\/\/\/\/\/*** CHANGE TO users\onedrive\%username% IF SOURCE IS OneDrive **********************
-SET source=users\%username%
+SET source=%HOMEPATH%
 
 :: ********\/\/\/\/*********** ENTER BACKUP FOLDER NAME HERE (also changes name of log file)*******************
 SET backup=pcBackup
@@ -30,13 +29,13 @@ SET backup=pcBackup
 
 :: \/\/\/\/\/\/ Setup\Verify log file location \/\/\/\/\/\/
 
-IF NOT EXIST %drive%:\%source%\logs\ (MKDIR %drive%:\%source%\logs)
+IF NOT EXIST %USERPROFILE%\logs\ (MKDIR %USERPROFILE%\logs)
 
-SET log=%drive%:\%source%\logs\%backup%.log
+SET log=%USERPROFILE%\logs\%backup%.log
 
 :: CD /? for help
 
-CD %drive%:\%source%\logs
+CD %USERPROFILE%\logs
 
 ECHO ====== %DATE% %TIME% ====== >> %backup%.log
 
@@ -47,7 +46,7 @@ ECHO ====== %DATE% %TIME% ====== >> %backup%.log
 
 :: IF /? for help
 
-IF NOT EXIST %drive%:\%source% (ECHO The system cannot find the path specified. & COLOR 00 & GOTO end) ELSE (SET /P destination=Enter backup drive ^( c ^| d ^| f ^| ... ^) : )
+SET /P destination=Enter backup drive ^( c ^| d ^| f ^| ... ^) : 
 
 IF /I %destination%==%drive% (ECHO Backup drive must not be same as source drive & COLOR 00 & GOTO end) ELSE (
 
@@ -64,9 +63,9 @@ SET destination=%destination%:\%backup%
 
 :: \/\/\/\/\/\/ Setup/Verify backup.txt (List of folders\files to backup) \/\/\/\/\/\/
 
-CD %drive%:\%source%
+CD %USERPROFILE%
 
-IF NOT EXIST %CD%\backup.txt (ECHO :: List folders\files from %drive%:\%source% you want backed up. > backup.txt & (
+IF NOT EXIST %CD%\backup.txt (ECHO :: List folders\files from %USERPROFILE% you want backed up. > backup.txt & (
 
 ECHO :: **Example list**
 
@@ -96,7 +95,7 @@ ECHO :: **Start your list below**
 
 :: ROBOCOPY /? for help
 
-FOR /F "delims=" %%a IN ('FINDSTR /v :: %CD%\backup.txt') DO (ROBOCOPY "\%source%\%%a " "%destination%\%%a " /MIR /LOG+:%log%)
+FOR /F "delims=" %%a IN ('FINDSTR /v :: %CD%\backup.txt') DO (ROBOCOPY "%source%\%%a " "%destination%\%%a " /MIR /LOG+:%log%)
 
 :: /\/\/\/\/\/\ Copy folders\files listed in backup.txt /\/\/\/\/\/\
 
@@ -123,9 +122,9 @@ IF %errorlevel% EQU 0 (ECHO No files were copied. No failure was encountered. No
 
 :: /\/\/\/\/\/\ Check for errors and print helpful info if needed /\/\/\/\/\/\
 
-:END
+:end
 
-ECHO Exit %errorlevel%
+ECHO Exit %ERRORLEVEL%
 
 :: ENDLOCAL /? for help
 
@@ -135,7 +134,7 @@ ENDLOCAL
 
 PAUSE
 
-:NOPAUSEEXIT
+:nopauseexit
 
 :: EXIT /? for help
 
