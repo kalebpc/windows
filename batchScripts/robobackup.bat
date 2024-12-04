@@ -75,9 +75,7 @@ ECHO :: Documents\
 
 ECHO :: Downloads\
 
-ECHO :: example.txt
-
-ECHO :: Pictures\MyPictures\picture.jpg
+ECHO :: Pictures\MyPictures\
 
 ECHO ::
 
