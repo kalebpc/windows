@@ -1,4 +1,6 @@
 
+:: Prevents online searching when using search in start menu
+
 @ECHO OFF
 
 SETLOCAL
