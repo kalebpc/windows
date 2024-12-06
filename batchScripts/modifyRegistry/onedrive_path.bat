@@ -1,13 +1,5 @@
 
-:: # Set the new path in the registry as powershell command
-:: Set-ItemProperty -Path $keyPath -Name $valueName -Value $newPath
-
-:: List of registry names to modify
-:: {0DDD015D-B06C-45D5-8C4C-F59713854639} PICTURES
-:: {F42EE2D3-909F-4907-8871-4C22FC0BF756} DOCUMENTS
-:: Desktop
-:: My Pictures
-:: Personal
+:: Remove onedrive from folder paths in registry
 
 @ECHO OFF
 
