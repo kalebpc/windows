@@ -1,9 +1,6 @@
 :: Clean terminal for better ui look
 @ECHO OFF
 
-:: White background with black text
-COLOR f0
-
 :: Get user input
 SET /P disc=What disc do you want to tree? (c ^| d ^| f) ^:
 
