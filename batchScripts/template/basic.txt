@@ -1,0 +1,62 @@
+:: Code description ...
+
+@ECHO OFF
+
+:: Option: SETLOCAL ENABLEDELAYEDEXPANSION
+SETLOCAL
+
+SET arg1=%1
+
+SET arg2=%2
+
+IF DEFINED arg1 (IF "%arg1%"=="/?" (GOTO usage)) ELSE (GOTO promptuser)
+
+IF DEFINED arg2 (IF "%arg2%"=="/?" (GOTO usage))
+
+:continue
+
+:: ...
+
+ECHO.Exit %ERRORLEVEL%
+
+:end
+
+IF NOT DEFINED arg1 (PAUSE)
+
+EXIT /B
+
+:usage
+
+ECHO.USAGE:
+
+ECHO.   filename.bat ... [Options] ...
+
+ECHO.
+
+ECHO.   Options:
+
+ECHO.	/?		Display this help message
+
+ECHO.	...		...
+
+ECHO.
+
+ECHO.	Note:
+
+ECHO.	...
+
+ECHO.	
+
+ECHO.	Examples:
+
+ECHO.		...
+
+GOTO end
+
+:promptuser
+
+:: ...
+
+GOTO continue
+
+ENDLOCAL
