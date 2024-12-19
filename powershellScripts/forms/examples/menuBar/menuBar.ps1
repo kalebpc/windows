@@ -1,4 +1,4 @@
-Add-Type -AssemblyName System.Windows.Forms, PresentationFramework, System.Drawing
+Add-Type -AssemblyName System.Windows.Forms, PresentationFramework
 
 $iconFile = "./images/icon.png"
 
