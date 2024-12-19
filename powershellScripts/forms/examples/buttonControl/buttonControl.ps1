@@ -1,7 +1,7 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName PresentationFramework
 
-$xamlFile = "./MainWindow.xaml"
+$xamlFile = "./xaml/MainWindow.xaml"
 
 $xamlContent = Get-Content $xamlFile
 
