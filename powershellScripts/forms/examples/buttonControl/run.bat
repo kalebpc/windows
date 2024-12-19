@@ -1,5 +1,5 @@
 @ECHO OFF
 
-POWERSHELL -ExecutionPolicy Bypass -File ./button_control.ps1
+POWERSHELL -ExecutionPolicy Bypass -File ./buttonControl.ps1
 
 EXIT /B
