@@ -7,7 +7,7 @@
         mc:Ignorable="d"
 	WindowStyle="None"
         SizeToContent="WidthAndHeight"
-        Title="Document Creation" MinHeight="77" MinWidth="300" Width="Auto" Background="#FF47516B">
+        Title="Task Widget" MinHeight="77" MinWidth="300" Width="Auto" Background="#FF47516B">
     <Grid>
         <StackPanel Background="#FF47516B">
             <DockPanel x:Name="menuPanel" LastChildFill="False" Background="#FF47516B">
