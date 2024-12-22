@@ -1,51 +1,46 @@
 Add-Type -AssemblyName System.Windows.Forms, PresentationFramework
 
-# ****** Load xaml ******
+Import-Module -Name ..\modules\InitializeXamlWindow
 
-$xamlFile = "./xaml/MainWindow.xaml"
+Try {
+    $Window = Initialize-XamlWindow -Path "./xaml/MainWindow.xaml"
 
-$xamlContent = Get-Content $xamlFile
+    $Window.variables.xamlMenuPanel.Add_MouseDown({
+        $Window.window.SizeToContent = "Manual"
+        $Window.window.WindowState = "Normal"
+        $Window.window.DragMove()
+    })
 
-$xamlContent = $xamlContent -replace 'mc:Ignorable="d"', '' -replace 'x:N', 'N' -replace 'x:Class=".*?"', ''
+    $Window.variables.xamlMenuWindowClose.Add_Click({
+        $Window.window.Close()
+    })
 
-[xml]$xmlNodes = $xamlContent
+    $Window.variables.xamlWindowControlMinimize.Add_Click({
+        $Window.window.WindowState = "Minimized"
+    })
 
-$reader = New-Object System.Xml.XmlNodeReader $xmlNodes
+    $Window.variables.xamlTasksClearAll.Add_Click({
+        $Window.variables.keys | ForEach-Object { if ($_ -like "xamlcheckbox*") {$Window.variables.$_.IsChecked = $False} }
+        $Window.variables.keys | ForEach-Object { if ($_ -like "xamltextbox*") {$Window.variables.$_.Text = ""} }
+    })
 
-$window = [Windows.Markup.XamlReader]::Load($reader)
+    $Window.variables.xamlTasksClearChecks.Add_Click({
+        $Window.variables.keys | ForEach-Object { if ($_ -like "xamlcheckbox*") {$Window.variables.$_.IsChecked = $False} }
+    })
 
-# Set env vars for named elements from xaml file
-$xmlNodes.SelectNodes("//*[@Name]") | ForEach-Object {Set-Variable -Name ($_.Name) -Value $window.FindName($_.Name)}
+    $Window.variables.xamlTasksClearTasks.Add_Click({
+        $Window.variables.keys | ForEach-Object { if ($_ -like "xamltextbox*") {$Window.variables.$_.Text = ""} }
+    })
 
-# ****** Window Controls ******
+    $Window.variables.xamlAboutLink.Add_Click({
+        [System.Diagnostics.Process]::Start("firefox",$Window.variables.xamlAboutLink.Header.substring(13))
+    })
 
-$menuPanel.Add_MouseDown({
-    $window.SizeToContent = "Manual"
-    $window.WindowState = "Normal"
-    $window.DragMove()
-})
-
-$menuWindowClose.Add_Click({
-    $window.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-})
-
-$windowControlMinimize.Add_Click({
-    $window.WindowState = "Minimized"
-})
-
-# ****** Task List Controls ******
-
-$tasksClearAll.Add_Click({
-    Get-Variable checkbox* -valueOnly | ForEach-Object {$_.IsChecked = $False}
-    Get-Variable textbox* -valueOnly | ForEach-Object {$_.Text = ""}
-})
-
-$tasksClearChecks.Add_Click({
-    Get-Variable checkbox* -valueOnly | ForEach-Object {$_.IsChecked = $False}
-})
-
-$tasksClearTasks.Add_Click({
-    Get-Variable textbox* -valueOnly | ForEach-Object {$_.Text = ""}
-})
-
-$window.ShowDialog() | Out-Null
+    $Window.window.ShowDialog() | Out-Null
+} 
+Catch [System.Exception] {
+    Write-Host "Error occurred: $($_.Exception.Message)"
+}
+Finally {
+    EXIT
+}
