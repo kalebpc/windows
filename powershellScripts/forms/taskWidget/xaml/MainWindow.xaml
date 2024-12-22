@@ -1,53 +1,51 @@
-﻿<Window x:Class="WpfApp1.MainWindow"
+<Window x:Class="WpfApp1.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-	WindowStyle="None"
-        SizeToContent="WidthAndHeight"
-        Title="Task Widget" MinHeight="77" MinWidth="300" Width="Auto" Background="#FF47516B">
+        Title="Task Widget" SizeToContent="WidthAndHeight" WindowStyle="None" MinHeight="77" MinWidth="300" Width="Auto" Background="#FF47516B">
     <Grid>
         <StackPanel Background="#FF47516B">
-            <DockPanel x:Name="menuPanel" LastChildFill="False" Background="#FF47516B">
-                <Menu x:Name="menuControl" FontSize="30" Background="#FF47516B">
-                    <MenuItem x:Name="menuTask" Header="a" FontFamily="Marlett">
-                        <MenuItem x:Name="tasksClearAll" Header="Clear All" FontSize="15" FontFamily="Segoe UI"/>
-                        <MenuItem x:Name="tasksClearChecks" Header="Clear Checks" FontSize="15" FontFamily="Segoe UI"/>
-                        <MenuItem x:Name="tasksClearTasks" Header="Clear Tasks" FontSize="15" FontFamily="Segoe UI"/>
+            <DockPanel x:Name="xamlMenuPanel" LastChildFill="False" Background="#FF47516B">
+                <Menu FontSize="30" Background="#FF47516B">
+                    <MenuItem Header="a" FontFamily="Marlett">
+                        <MenuItem x:Name="xamlTasksClearAll" Header="Clear All" FontSize="15" FontFamily="Segoe UI"/>
+                        <MenuItem x:Name="xamlTasksClearChecks" Header="Clear Checks" FontSize="15" FontFamily="Segoe UI"/>
+                        <MenuItem x:Name="xamlTasksClearTasks" Header="Clear Tasks" FontSize="15" FontFamily="Segoe UI"/>
                         <Separator/>
                         <MenuItem Header="About" FontSize="15" FontFamily="Segoe UI">
                             <MenuItem Header="Title: Task Widget"/>
-                            <MenuItem Header="CopyRight © https://github.com/kalebpc"/>
+                            <MenuItem x:Name="xamlAboutLink" Header="CopyRight © https://github.com/kalebpc"/>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem x:Name="menuWindowClose" Icon="×" Header="Close     Alt+F4" FontSize="15" FontFamily="Segoe UI"/>
+                        <MenuItem x:Name="xamlMenuWindowClose" Icon="×" Header="Close     Alt+F4" FontSize="15" FontFamily="Segoe UI"/>
                     </MenuItem>
                 </Menu>
-                <Menu x:Name="windowControl" DockPanel.Dock="Right" FontSize="30" Background="#FF47516B">
-                    <MenuItem x:Name="windowControlMinimize" Header="q" FontFamily="Marlett"/>
+                <Menu DockPanel.Dock="Right" FontSize="30" Background="#FF47516B">
+                    <MenuItem x:Name="xamlWindowControlMinimize" Header="q" FontFamily="Marlett"/>
                 </Menu>
             </DockPanel>
             <StackPanel Margin="6,0,6,6" Background="#FFEEEEF2">
-                <StackPanel x:Name="stackpanelTasks" TextBlock.FontSize="15">
-                    <CheckBox x:Name="checkbox1" Margin="9" Background="#FFEEEEF2">
-                        <TextBox x:Name="textbox1" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
+                <StackPanel TextBlock.FontSize="15">
+                    <CheckBox x:Name="xamlCheckbox1" Margin="9" Background="#FFEEEEF2">
+                        <TextBox x:Name="xamlTextbox1" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
                     </CheckBox>
-                    <CheckBox x:Name="checkbox2" Visibility="Visible" Height="Auto" Margin="9" Background="#FFEEEEF2">
-                        <TextBox x:Name="textbox2" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
+                    <CheckBox x:Name="xamlCheckbox2" Height="Auto" Margin="9" Background="#FFEEEEF2">
+                        <TextBox x:Name="xamlTextbox2" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
                     </CheckBox>
-                    <CheckBox x:Name="checkbox3" Visibility="Visible" Height="Auto" Margin="9" Background="#FFEEEEF2">
-                        <TextBox x:Name="textbox3" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
+                    <CheckBox x:Name="xamlCheckbox3" Height="Auto" Margin="9" Background="#FFEEEEF2">
+                        <TextBox x:Name="xamlTextbox3" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
                     </CheckBox>
-                    <CheckBox x:Name="checkbox4" Visibility="Visible" Height="Auto" Margin="9" Background="#FFEEEEF2">
-                        <TextBox x:Name="textbox4" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
+                    <CheckBox x:Name="xamlCheckbox4" Height="Auto" Margin="9" Background="#FFEEEEF2">
+                        <TextBox x:Name="xamlTextbox4" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
                     </CheckBox>
-                    <CheckBox x:Name="checkbox5" Visibility="Visible" Height="Auto" Margin="9" Background="#FFEEEEF2">
-                        <TextBox x:Name="textbox5" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
+                    <CheckBox x:Name="xamlCheckbox5" Height="Auto" Margin="9" Background="#FFEEEEF2">
+                        <TextBox x:Name="xamlTextbox5" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
                     </CheckBox>
-                    <CheckBox x:Name="checkbox6" Visibility="Visible" Height="Auto" Margin="9" Background="#FFEEEEF2">
-                        <TextBox x:Name="textbox6" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
+                    <CheckBox x:Name="xamlCheckbox6" Height="Auto" Margin="9" Background="#FFEEEEF2">
+                        <TextBox x:Name="xamlTextbox6" TextWrapping="Wrap" MinWidth="60" Background="#FFEEEEF2"/>
                     </CheckBox>
                 </StackPanel>
             </StackPanel>
