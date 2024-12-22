@@ -2,4 +2,4 @@
 
 POWERSHELL -ExecutionPolicy Bypass -File ./taskWidget.ps1
 
-EXIT
+EXIT /B
