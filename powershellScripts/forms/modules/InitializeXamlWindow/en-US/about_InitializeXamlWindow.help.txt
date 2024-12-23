@@ -1,0 +1,23 @@
+TOPIC
+
+    about_InitializeXamlWindow
+
+SHORT DESCRIPTION
+
+    Take xaml file and return [hashtable]$Window containing [System.Windows.Window]window and [hashtable]variables.
+
+PARAMETER Path
+
+    Absolute or relative path to xaml file being used.
+
+EXAMPLES
+
+    Initialize-XamlWindow -Path "$Env:SystemDrive/Absolute/Path/to/XamlFileName.xaml"
+
+    Initialize-XamlWindow "./Relative/Path/to/XamlFileName.xaml"
+
+KEYWORDS
+
+    initializexamlwindow xaml wpf window
+
+SEE ALSO
