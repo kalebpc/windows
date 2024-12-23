@@ -50,7 +50,7 @@ param (
     $variables = @{}
 
     ## Set vars for named elements from xaml file
-    $xmlNodes.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name ($_.Name) -Value $window.FindName($_.Name) }
+    $xmlNodes.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name ("xaml", $_.Name -join "") -Value $window.FindName($_.Name) }
 
     Get-Variable xaml* | ForEach-Object { $variables[$_.Name] = $_.Value }
 
