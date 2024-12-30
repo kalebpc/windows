@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE catalog SYSTEM "data1.dtd">
+<catalog>
+  <function id="fnc101">
+    <name>Rotate</name>
+    <option>Rotate0</option>
+    <option>Rotate90</option>
+    <option>Rotate180</option>
+    <option>Rotate270</option>
+    <Description/>
+  </function>
+  <function id="fnc102">
+    <name>Greyscale</name>
+    <option>Gray32Float</option>
+    <Description />
+  </function>
+</catalog>

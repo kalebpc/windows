@@ -1,0 +1,6 @@
+<!ELEMENT catalog (function+)>
+<!ELEMENT function (name,option*,Description)>
+<!ATTLIST function id NMTOKEN #REQUIRED>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT option (#PCDATA)>
+<!ELEMENT Description EMPTY>
