@@ -1,0 +1,6 @@
+<!ELEMENT catalog (combo+)>
+<!ELEMENT combo (name,option*,Description)>
+<!ATTLIST combo id NMTOKEN #REQUIRED>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT option (#PCDATA)>
+<!ELEMENT Description EMPTY>

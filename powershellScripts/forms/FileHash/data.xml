@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE catalog SYSTEM "data1.dtd">
+<catalog>
+  <combo id="com101">
+    <name>Algorithm</name>
+    <option>SHA1</option>
+    <option>SHA256</option>
+    <option>SHA384</option>
+    <option>SHA512</option>
+    <option>MACTripleDES</option>
+    <option>MD5</option>
+    <option>RIPEMD160</option>
+    <Description/>
+  </combo>
+</catalog>
