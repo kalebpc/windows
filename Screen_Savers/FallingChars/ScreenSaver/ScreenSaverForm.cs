@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 //using System.ComponentModel;
 //using System.Data;
@@ -99,6 +99,8 @@ namespace ScreenSaver
         {
             InitializeComponent();
             this.Bounds = Bounds;
+            // This line makes it draw on multiple monitors correctly
+            this.StartPosition = FormStartPosition.Manual;
         }
 
         private void ScreenSaverForm_Load(object sender, EventArgs e)
