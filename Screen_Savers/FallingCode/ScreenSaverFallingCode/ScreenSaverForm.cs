@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 //using System.ComponentModel;
 //using System.Data;
@@ -86,8 +86,9 @@ namespace ScreenSaverFallingCode
             //Color.MidnightBlue
         };
 
-        private readonly int maxCharWidth = 33;
+        private readonly int maxCharWidth = 32;
         private readonly int fontSize = 16;
+        private readonly int columnWidth = 50;
         private readonly Font font = new Font("Segoe UI", 16);
 
         public ScreenSaverForm(Rectangle Bounds)
@@ -121,7 +122,7 @@ namespace ScreenSaverFallingCode
             TextLabel.Left = (Bounds.Width / 2) - (TextLabel.Width / 2);
 
             // Create list of label raindrops
-            for (int i = 0; i < (Bounds.Width / maxCharWidth); i++)
+            for (int i = 0; i < (Bounds.Width / columnWidth); i++)
             {
                 string character = characters[rand.Next(0, characters.Count())];
                 int startHeight = rand.Next(-Bounds.Height*2, 0);
@@ -135,11 +136,11 @@ namespace ScreenSaverFallingCode
                 };
                 Label label1 = new Label
                 {
-                    Top = maxCharWidth/4,
+                    Top = 2,
                     Font = new Font("Segoe UI", fontSize),
                     ForeColor = colors[0],
-                    Width = fontSize,
-                    Height = Bounds.Height
+                    Width = columnWidth,
+                    AutoSize=true
                 };
                 if (i < 1)
                 {
@@ -148,7 +149,7 @@ namespace ScreenSaverFallingCode
                 }
                 else
                 {
-                    int left = rainDrops[i - 1].Left + maxCharWidth;
+                    int left = rainDrops[i - 1].Left + columnWidth;
                     label.Left = left;
                     label1.Left = left;
                 }
@@ -181,25 +182,29 @@ namespace ScreenSaverFallingCode
                     // update columns
                     if (rainDrops[i].Top > 0)
                     {
-                        if (rainDrops[i].Top < fontSize * 2)
+                        if (rainDrops[i].Top < fontSize*2)
                         {
                             rainDropsColumns[i].Text = "";
+                            rainDropsColumns[i].Top = 0;
                         }
+                        rainDropsColumns[i].Text += Environment.NewLine;
                         rainDropsColumns[i].Text += rainDrops[i].Text;
+                        rainDropsColumns[i].Top = rainDrops[i].Top - rainDropsColumns[i].Height;
                     }
                     else
                     {
-                        string[] text = { " ", rainDropsColumns[i].Text };
-                        rainDropsColumns[i].Text = string.Join(" ", text);
+                        rainDropsColumns[i].Top += rainDrops[i].Size.Height;
                     }
                 }
                 // Else move back to top
                 else
                 {
                     rainDrops[i].Top = rand.Next(-Bounds.Height * 2, 0);
-                    if (rand.Next(0, 100) < 50)
+                    // empty column
+                    if (rand.Next(0, 100) < 79)
                     {
                         rainDropsColumns[i].Text = "";
+                        rainDropsColumns[i].Top = 0;
                     }
 
                 }
