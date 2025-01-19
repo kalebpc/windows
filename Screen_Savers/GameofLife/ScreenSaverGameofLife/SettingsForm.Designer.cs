@@ -126,9 +126,7 @@
             this.ShapeComboBox.FormattingEnabled = true;
             this.ShapeComboBox.Items.AddRange(new object[] {
             "Square",
-            "Circle",
-            "FishScales",
-            "X"});
+            "Circle"});
             this.ShapeComboBox.Location = new System.Drawing.Point(16, 262);
             this.ShapeComboBox.Name = "ShapeComboBox";
             this.ShapeComboBox.Size = new System.Drawing.Size(108, 21);

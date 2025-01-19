@@ -36,7 +36,7 @@ namespace ScreenSaverGameofLife
         private readonly bool previewMode = false;
         private readonly static Random rand = new Random();
         private bool initialized = false;
-        private readonly int countStagnantReSeed = 100;
+        private readonly int countStagnantReSeed = 500;
         private int countStagnant = 0;
         private int count = 0;
         private int cellSize;
@@ -74,21 +74,33 @@ namespace ScreenSaverGameofLife
             RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverGameofLife");
             if (key != null)
             {
-                // Get saved screensaver params
-                shape = (string)key.GetValue("shape");
-                switch ((string)key.GetValue("outline"))
+                try
                 {
-                    case "True":
-                        outLine = true;
-                        break;
-                    case "False":
-                        outLine = false;
-                        break;
+                    // Get saved screensaver params
+                    shape = (string)key.GetValue("shape");
+                    switch ((string)key.GetValue("outline"))
+                    {
+                        case "true":
+                            outLine = true;
+                            break;
+                        case "false":
+                            outLine = false;
+                            break;
+                    }
+                    cellSize = (int)key.GetValue("shapeSize");
+                    borderSize = (int)key.GetValue("borderSize");
+                    shapeColor = Color.FromName((string)key.GetValue("shapeColor"));
+                    backgroundColor = Color.FromName((string)key.GetValue("backColor"));
                 }
-                cellSize = (int)key.GetValue("shapeSize");
-                borderSize = (int)key.GetValue("borderSize");
-                shapeColor = Color.FromName((string)key.GetValue("shapeColor"));
-                backgroundColor = Color.FromName((string)key.GetValue("backColor"));
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    shape = "rectangle";
+                    cellSize = 24;
+                    borderSize = 8;
+                    shapeColor = Color.Lime;
+                    backgroundColor = Color.Black;
+                }
             }
             else
             {
@@ -110,21 +122,14 @@ namespace ScreenSaverGameofLife
             if (cellSize < 24)
                 cellSize = 24;
             if (borderSize > cellSize)
-                borderSize = 0;
+                borderSize = cellSize - 2;
 
             brush = new SolidBrush(backgroundColor);
             brush1 = new SolidBrush(shapeColor);
             pen1 = new Pen(shapeColor, borderSize) { Alignment = System.Drawing.Drawing2D.PenAlignment.Center };
 
-            // Number of columns and rows
             cols = Math.Max(1, (Bounds.Width / cellSize) + 1);
             rows = Math.Max(1, (Bounds.Height / cellSize) + 1);
-
-            if (previewMode)
-            {
-                cellSize = 2;
-                borderSize = 0;
-            }
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
@@ -342,8 +347,9 @@ namespace ScreenSaverGameofLife
                 }
             }
             count++;
-            if (countStagnant > countStagnantReSeed)
+            if (countStagnant > countStagnantReSeed || count > countStagnantReSeed*1.5)
             {
+                count = 0;
                 countStagnant = 0;
                 ReSeed();
             }
@@ -357,12 +363,6 @@ namespace ScreenSaverGameofLife
             else if (living == livingNew)
             {
                 countStagnant++;
-            }
-            // Force reseed after 500 counts
-            else if (count > 500)
-            {
-                count = 0;
-                ReSeed();
             }
         }
 

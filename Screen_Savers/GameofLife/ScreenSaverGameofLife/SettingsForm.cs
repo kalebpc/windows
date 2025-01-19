@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.Windows.Forms;
+using Microsoft.Win32;
 //using System.Collections.Generic;
 //using System.ComponentModel;
 //using System.Data;
@@ -7,10 +9,6 @@ using System.Drawing;
 //using System.Text;
 //using System.Threading.Tasks;
 //using System.Windows;
-using System.Windows.Forms;
-using Microsoft.Win32;
-
-
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace ScreenSaverGameofLife
@@ -90,7 +88,7 @@ namespace ScreenSaverGameofLife
 
         private void PreSelectOutline(string outline)
         {
-            if (outline.Equals(true))
+            if (outline.Equals("true"))
                 OutlineCheckBox.Checked = true;
         }
 
