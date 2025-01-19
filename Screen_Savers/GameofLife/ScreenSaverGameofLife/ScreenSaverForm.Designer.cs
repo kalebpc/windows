@@ -1,4 +1,4 @@
-namespace ScreenSaverGameofLife
+﻿namespace ScreenSaverGameofLife
 {
     partial class ScreenSaverForm
     {
