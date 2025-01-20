@@ -33,10 +33,15 @@ namespace ScreenSaverGameofLife
                 key.SetValue("shape", (string)GetShape());
                 key.SetValue("shapeSize", (int)GetShapeSize());
                 key.SetValue("borderSize", (int)GetBorderSize());
+                key.SetValue("startDegree", (int)GetStartAngle());
+                key.SetValue("endDegree", (int)GetEndAngle());
             }
             catch (Exception)
             {
-                MessageBox.Show("Error occured Saving settings to Registry.");
+                MessageBox.Show("Error occured Saving settings to Registry.",
+                    "ScreenSaverGameofLife",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
             }
         }
 
@@ -55,11 +60,16 @@ namespace ScreenSaverGameofLife
                     PreSelectShape((string)key.GetValue("shape"));
                     PreSelectShapeSize((int)key.GetValue("shapeSize"));
                     PreSelectBorderSize((int)key.GetValue("borderSize"));
+                    PreSelectStartAngle((int)key.GetValue("startDegree"));
+                    PreSelectEndAngle((int)key.GetValue("endDegree"));
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message,
+                    "ScreenSaverGameofLife",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
             }
         }
 
@@ -94,23 +104,13 @@ namespace ScreenSaverGameofLife
 
         private void PreSelectShape(string shape)
         {
-            switch (shape)
-            {
-                case "rectangle":
-                    ShapeComboBox.Text = "Square";
-                    break;
-                case "ellipse":
-                    ShapeComboBox.Text = "Circle";
-                    break;
-                case "bezier":
-                    ShapeComboBox.Text = "FishScales";
-                    break;
-                case "line":
-                    ShapeComboBox.Text = "X";
-                    break;
-            }
+            ShapeComboBox.Text = shape;
         }
 
+        private string GetShape()
+        {
+            return ShapeComboBox.Text;
+        }
 
         private string BoolOutline()
         {
@@ -118,23 +118,6 @@ namespace ScreenSaverGameofLife
                 return "true";
             else
                 return "false";
-        }
-
-        private string GetShape()
-        {
-            switch (ShapeComboBox.Text)
-            {
-                case "Square":
-                    return "rectangle";
-                case "Circle":
-                    return "ellipse";
-                case "FishScales":
-                    return "bezier";
-                case "X":
-                    return "line";
-                default:
-                    return "rectangle";
-            }
         }
 
         private int GetShapeSize()
@@ -179,9 +162,29 @@ namespace ScreenSaverGameofLife
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message, "ScreenSaverGameofLife", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
+        }
+
+        private int GetStartAngle()
+        {
+            return StartAngleTrackBar.Value * 45;
+        }
+
+        private int GetEndAngle()
+        {
+            return EndAngleTrackBar.Value * 45;
+        }
+
+        private void PreSelectStartAngle(int angle)
+        {
+            StartAngleTrackBar.Value = angle / 45;
+        }
+
+        private void PreSelectEndAngle(int angle)
+        {
+            EndAngleTrackBar.Value = angle / 45;
         }
 
         private void BackgroundColorComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -204,6 +207,14 @@ namespace ScreenSaverGameofLife
         {
             if (BorderNumericUpDown.Value > ShapeNumericUpDown.Value - 2)
                 BorderNumericUpDown.Value = ShapeNumericUpDown.Value - 2;
+        }
+
+        private void ShapeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ShapeComboBox.Text == "Arc")
+                AngleGroupBox.Visible = true;
+            else
+                AngleGroupBox.Visible = false;
         }
     }
 }

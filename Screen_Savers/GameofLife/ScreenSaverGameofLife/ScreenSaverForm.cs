@@ -49,9 +49,11 @@ namespace ScreenSaverGameofLife
         Brush brush;
         Brush brush1;
         Pen pen1;
+        private int startDegree;
+        private int endDegree;
         private bool outLine = false;
-        private List<List<RectangleF>> rectGridF = new List<List<RectangleF>>();
-        private List<List<Rectangle>> rectGrid = new List<List<Rectangle>>();
+        private List<List<RectangleF>> rectGridF;
+        private List<List<Rectangle>> rectGrid;
         // sized for up to 4k monitor (3840/24px + 1)
         private int[,] gridState = new int[161, 161];
         private int[,] gridStateNew = new int[161, 161];
@@ -60,9 +62,9 @@ namespace ScreenSaverGameofLife
         public ScreenSaverForm(Rectangle Bounds)
         {
             InitializeComponent();
-            this.Bounds = Bounds;
             StartPosition = FormStartPosition.Manual;
             DoubleBuffered = true;
+            this.Bounds = Bounds;
         }
 
         private void ScreenSaverForm_Load(object sender, EventArgs e)
@@ -91,10 +93,15 @@ namespace ScreenSaverGameofLife
                     borderSize = (int)key.GetValue("borderSize");
                     shapeColor = Color.FromName((string)key.GetValue("shapeColor"));
                     backgroundColor = Color.FromName((string)key.GetValue("backColor"));
+                    startDegree = (int)key.GetValue("startDegree");
+                    endDegree = (int)key.GetValue("endDegree");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show(ex.Message,
+                        "ScreenSaverGameofLife",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Exclamation);
                     shape = "rectangle";
                     cellSize = 24;
                     borderSize = 8;
@@ -110,15 +117,10 @@ namespace ScreenSaverGameofLife
                 shapeColor = Color.Lime;
                 backgroundColor = Color.Black;
             }
-            switch (outLine)
-            {
-                case true:
-                    if (cellSize < 40)
-                        cellSize = 40;
-                    if (borderSize < 8)
-                        borderSize = 8;
-                    break;
-            }
+
+            // minimum must have settings
+            if (endDegree == 0)
+                endDegree = 45;
             if (cellSize < 24)
                 cellSize = 24;
             if (borderSize > cellSize)
@@ -147,7 +149,7 @@ namespace ScreenSaverGameofLife
                 {
                     switch (shape)
                     {
-                        case "rectangle":
+                        case "Square":
                             switch (outLine)
                             {
                                 case true:
@@ -174,7 +176,7 @@ namespace ScreenSaverGameofLife
                                     break;
                             }
                             break;
-                        case "ellipse":
+                        case "Circle":
                             switch (outLine)
                             {
                                 case true:
@@ -184,7 +186,7 @@ namespace ScreenSaverGameofLife
                                             g.FillRectangle(brush, rectGridF[i][j]);
                                             break;
                                         case 1:
-                                            g.DrawEllipse(pen1, rectGridF[i][j]);
+                                            g.DrawArc(pen1, rectGridF[i][j], 0, 360);
                                             break;
                                     }
                                     break;
@@ -201,6 +203,44 @@ namespace ScreenSaverGameofLife
                                     break;
                             }
                             break;
+                        case "Fish Scales":
+                            switch (gridState[i, j])
+                            {
+                                case 0:
+                                    g.FillRectangle(brush, rectGridF[i][j]);
+                                    break;
+                                case 1:
+                                    g.DrawBezier(pen1,
+                                        rectGridF[i][j].X, rectGridF[i][j].Y,
+                                        rectGridF[i][j].X + cellSize - borderSize, rectGridF[i][j].Y,
+                                        rectGridF[i][j].X + cellSize - borderSize, rectGridF[i][j].Y + cellSize - borderSize,
+                                        rectGridF[i][j].X, rectGridF[i][j].Y + cellSize - borderSize);
+                                    break;
+                            }
+                            break;
+                        case "Arc":
+                            switch (gridState[i, j])
+                            {
+                                case 0:
+                                    g.FillRectangle(brush, rectGridF[i][j]);
+                                    break;
+                                case 1:
+                                    g.DrawArc(pen1, rectGridF[i][j], startDegree, endDegree);
+                                    break;
+                            }
+                            break;
+                        case "Stingray":
+                            switch (gridState[i, j])
+                            {
+                                case 0:
+                                    g.FillRectangle(brush, rectGridF[i][j]);
+                                    break;
+                                case 1:
+                                    g.DrawLine(pen1, rectGridF[i][j].X + cellSize, rectGridF[i][j].Y + cellSize, rectGridF[i][j].X + (cellSize / 2), rectGridF[i][j].Y + (cellSize / 2));
+                                    g.DrawPie(pen1, rectGridF[i][j], 90, 270);
+                                    break;
+                            }
+                            break;
                     }
                 }
             }
@@ -212,10 +252,24 @@ namespace ScreenSaverGameofLife
         {
             switch (shape)
             {
-                case "rectangle":
+                case "Square":
+                    rectGrid = new List<List<Rectangle>>();
                     RectangleShape();
                     break;
-                case "ellipse":
+                case "Circle":
+                    rectGridF = new List<List<RectangleF>>();
+                    RectangleFShape();
+                    break;
+                case "Fish Scales":
+                    rectGridF = new List<List<RectangleF>>();
+                    RectangleFShape();
+                    break;
+                case "Arc":
+                    rectGridF = new List<List<RectangleF>>();
+                    RectangleFShape();
+                    break;
+                case "Stingray":
+                    rectGridF = new List<List<RectangleF>>();
                     RectangleFShape();
                     break;
                 default:
@@ -386,189 +440,205 @@ namespace ScreenSaverGameofLife
                 // top
                 if (j < 1)
                 {
-                    if (gridState[(i - 1 + cols) % cols, (j - 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i, (j - 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i + 1, (j - 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[(i - 1 + cols) % cols, j] != 0)
-                        n++;
-                    if (gridState[i + 1, j] != 0)
-                        n++;
-                    if (gridState[(i - 1 + cols) % cols, j + 1] != 0)
-                        n++;
-                    if (gridState[i, j + 1] != 0)
-                        n++;
-                    if (gridState[i + 1, j + 1] != 0)
-                        n++;
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (int l = 0; l < 2; l++)
+                        {
+                            switch (gridState[i + k, j + l])
+                            {
+                                case 1:
+                                    n++;
+                                    break;
+                            }
+                        }
+                    }
+                    switch (gridState[i, j])
+                    {
+                        case 1:
+                            n--;
+                            break;
+                    }
                 }
                 // bottom
-                if (j > gridState.GetLength(1) - 1)
+                if (j > rows - 1)
                 {
-                    if (gridState[(i - 1 + cols) % cols, j - 1] != 0)
-                        n++;
-                    if (gridState[i, j - 1] != 0)
-                        n++;
-                    if (gridState[i + 1, j - 1] != 0)
-                        n++;
-                    if (gridState[(i - 1 + cols) % cols, j] != 0)
-                        n++;
-                    if (gridState[i + 1, j] != 0)
-                        n++;
-                    if (gridState[(i - 1 + cols) % cols, (j + 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i, (j + 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i + 1, (j + 1 + rows) % rows] != 0)
-                        n++;
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (int l = -1; l < 1; l++)
+                        {
+                            switch (gridState[i + k, j + l])
+                            {
+                                case 1:
+                                    n++;
+                                    break;
+                            }
+                        }
+                    }
+                    switch (gridState[i, j])
+                    {
+                        case 1:
+                            n--;
+                            break;
+                    }
                 }
             }
             // right corners
-            if (i > gridState.GetLength(0) - 1)
+            if (i > rows - 1)
             {
                 // top
                 if (j < 1)
                 {
-                    if (gridState[i - 1, (j - 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i, (j - 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[(i + 1 + cols) % cols, (j - 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i - 1, j] != 0)
-                        n++;
-                    if (gridState[(i + 1 + cols) % cols, j] != 0)
-                        n++;
-                    if (gridState[i - 1, j + 1] != 0)
-                        n++;
-                    if (gridState[i, j + 1] != 0)
-                        n++;
-                    if (gridState[(i + 1 + cols) % cols, j + 1] != 0)
-                        n++;
+                    for (int k = -1; k < 1; k++)
+                    {
+                        for (int l = 0; l < 2; l++)
+                        {
+                            switch (gridState[i + k, j + l])
+                            {
+                                case 1:
+                                    n++;
+                                    break;
+                            }
+                        }
+                    }
+                    switch (gridState[i, j])
+                    {
+                        case 1:
+                            n--;
+                            break;
+                    }
                 }
                 // bottom
-                if (j > gridState.GetLength(1) - 1)
+                if (j > rows - 1)
                 {
-                    if (gridState[i - 1, j - 1] != 0)
-                        n++;
-                    if (gridState[i, j - 1] != 0)
-                        n++;
-                    if (gridState[(i + 1 + cols) % cols, j - 1] != 0)
-                        n++;
-                    if (gridState[i - 1, j] != 0)
-                        n++;
-                    if (gridState[(i + 1 + cols) % cols, j] != 0)
-                        n++;
-                    if (gridState[i - 1, (j + 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[i, (j + 1 + rows) % rows] != 0)
-                        n++;
-                    if (gridState[(i + 1 + cols) % cols, (j + 1 + rows) % rows] != 0)
-                        n++;
+                    for (int k = -1; k < 1; k++)
+                    {
+                        for (int l = -1; l < 1; l++)
+                        {
+                            switch (gridState[i + k, j + l])
+                            {
+                                case 1:
+                                    n++;
+                                    break;
+                            }
+                        }
+                    }
+                    switch (gridState[i, j])
+                    {
+                        case 1:
+                            n--;
+                            break;
+                    }
                 }
             }
             // middle cells
-            if (i > 0 && i < gridState.GetLength(0) - 1 && j > 0 && j < gridState.GetLength(1) - 1)
+            if (i > 0 && i < cols && j > 0 && j < rows)
             {
-                if (gridState[i - 1, j - 1] != 0)
-                    n++;
-                if (gridState[i - 1, j - 1] != 0)
-                    n++;
-                if (gridState[i, j - 1] != 0)
-                    n++;
-                if (gridState[i + 1, j - 1] != 0)
-                    n++;
-                if (gridState[i - 1, j] != 0)
-                    n++;
-                if (gridState[i + 1, j] != 0)
-                    n++;
-                if (gridState[i - 1, j + 1] != 0)
-                    n++;
-                if (gridState[i, j + 1] != 0)
-                    n++;
-                if (gridState[i + 1, j + 1] != 0)
-                    n++;
+                for (int k = -1; k < 2; k++)
+                {
+                    for (int l = -1; l < 2; l++)
+                    {
+                        switch (gridState[i + k, j + l])
+                        {
+                            case 1:
+                                n++;
+                                break;
+                        }
+                    }
+                }
+                switch (gridState[i, j])
+                {
+                    case 1:
+                        n--;
+                        break;
+                }
             }
             // left border
-            if (i < 1 && j > 0 && j < gridState.GetLength(1) - 1)
+            if (i < 1 && j > 0 && j < rows)
             {
-                if (gridState[(i - 1 + cols) % cols, j - 1] != 0)
-                    n++;
-                if (gridState[i, j - 1] != 0)
-                    n++;
-                if (gridState[i + 1, j - 1] != 0)
-                    n++;
-                if (gridState[(i - 1 + cols) % cols, j] != 0)
-                    n++;
-                if (gridState[i + 1, j] != 0)
-                    n++;
-                if (gridState[(i - 1 + cols) % cols, j + 1] != 0)
-                    n++;
-                if (gridState[i, j + 1] != 0)
-                    n++;
-                if (gridState[i + 1, j + 1] != 0)
-                    n++;
+                for (int k = 0; k < 2; k++)
+                {
+                    for (int l = -1; l < 2; l++)
+                    {
+                        switch (gridState[i + k, j + l])
+                        {
+                            case 1:
+                                n++;
+                                break;
+                        }
+                    }
+                }
+                switch (gridState[i, j])
+                {
+                    case 1:
+                        n--;
+                        break;
+                }
             }
             // right border
-            if (i > gridState.GetLength(0) - 1 && j > 0 && j < gridState.GetLength(1) - 2)
+            if (i > cols - 1 && j > 0 && j < rows)
             {
-                if (gridState[i - 1, j - 1] != 0)
-                    n++;
-                if (gridState[i, j - 1] != 0)
-                    n++;
-                if (gridState[(i + 1 + cols) % cols, j - 1] != 0)
-                    n++;
-                if (gridState[i - 1, j] != 0)
-                    n++;
-                if (gridState[(i + 1 + cols) % cols, j] != 0)
-                    n++;
-                if (gridState[i - 1, j + 1] != 0)
-                    n++;
-                if (gridState[i, j + 1] != 0)
-                    n++;
-                if (gridState[(i + 1 + cols) % cols, j + 1] != 0)
-                    n++;
+                for (int k = -1; k < 1; k++)
+                {
+                    for (int l = -1; l < 2; l++)
+                    {
+                        switch (gridState[i + k, j + l])
+                        {
+                            case 1:
+                                n++;
+                                break;
+                        }
+                    }
+                }
+                switch (gridState[i, j])
+                {
+                    case 1:
+                        n--;
+                        break;
+                }
             }
             // top border
-            if (i > 0 && i < gridState.GetLength(0) - 1 && j < 1)
+            if (i > 0 && i < cols - 1 && j < 1)
             {
-                if (gridState[i - 1, (j - 1 + rows) % rows] != 0)
-                    n++;
-                if (gridState[i, (j - 1 + rows) % rows] != 0)
-                    n++;
-                if (gridState[i + 1, (j - 1 + rows) % rows] != 0)
-                    n++;
-                if (gridState[i - 1, j] != 0)
-                    n++;
-                if (gridState[i + 1, j] != 0)
-                    n++;
-                if (gridState[i - 1, j + 1] != 0)
-                    n++;
-                if (gridState[i, j + 1] != 0)
-                    n++;
-                if (gridState[i + 1, j + 1] != 0)
-                    n++;
+                for (int k = -1; k < 2; k++)
+                {
+                    for (int l = 0; l < 2; l++)
+                    {
+                        switch (gridState[i + k, j + l])
+                        {
+                            case 1:
+                                n++;
+                                break;
+                        }
+                    }
+                }
+                switch (gridState[i, j])
+                {
+                    case 1:
+                        n--;
+                        break;
+                }
             }
             // bottom border
-            if (i > 0 && i < gridState.GetLength(0) - 1 && j > gridState.GetLength(1) - 2)
+            if (i > 0 && i < cols && j > rows - 1)
             {
-                if (gridState[i - 1, j - 1] != 0)
-                    n++;
-                if (gridState[i, j - 1] != 0)
-                    n++;
-                if (gridState[i + 1, j - 1] != 0)
-                    n++;
-                if (gridState[i - 1, j] != 0)
-                    n++;
-                if (gridState[i + 1, j] != 0)
-                    n++;
-                if (gridState[i - 1, (j + 1 + rows) % rows] != 0)
-                    n++;
-                if (gridState[i, (j + 1 + rows) % rows] != 0)
-                    n++;
-                if (gridState[i + 1, (j + 1 + rows) % rows] != 0)
-                    n++;
+                for (int k = -1; k < 2; k++)
+                {
+                    for (int l = -1; l < 1; l++)
+                    {
+                        switch (gridState[i + k, j + l])
+                        {
+                            case 1:
+                                n++;
+                                break;
+                        }
+                    }
+                }
+                switch (gridState[i, j])
+                {
+                    case 1:
+                        n--;
+                        break;
+                }
             }
             return n;
         }
