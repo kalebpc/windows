@@ -117,7 +117,6 @@ namespace ScreenSaverGameofLife
         private void OnPaint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.FillRectangle(screenSaverDict.BackgroundBrush, Bounds);
             for (int i = 0; i < screenSaverDict.Cols; i++)
             {
                 for (int j = 0; j < screenSaverDict.Rows; j++)
