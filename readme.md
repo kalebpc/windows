@@ -1,5 +1,5 @@
 
-### [ScreenSaverGameofLife](./Screen_Savers/ScreenSaverGameofLife/bin/Debug/)
+### [ScreenSaverGameofLife](./Screen_Savers/GameofLife/ScreenSaverGameofLife/bin/Debug/)
 
 ![GameofLifeSettings](./assets/png/GameofLifeSettings.png)
 
