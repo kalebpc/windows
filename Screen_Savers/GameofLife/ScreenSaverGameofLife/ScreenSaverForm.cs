@@ -4,18 +4,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
-//using System.Diagnostics;
-//using System.ComponentModel;
-//using System.Data;
-//using System.Drawing.Text;
-//using System.Linq;
-//using System.Runtime.CompilerServices;
-//using System.Text;
-//using System.Threading.Tasks;
-//using System.Timers;
-//using System.Windows.Forms.VisualStyles;
-//using ScreenSaverGameofLife;
-
+using ScreenSaverGameofLife;
 
 namespace ScreenSaverGameofLife
 {
@@ -35,29 +24,7 @@ namespace ScreenSaverGameofLife
 
         private readonly bool previewMode = false;
         private readonly static Random rand = new Random();
-        private bool initialized = false;
-        private readonly int countStagnantReSeed = 500;
-        private int countStagnant = 0;
-        private int count = 0;
-        private int cellSize;
-        private int borderSize;
-        private int cols;
-        private int rows;
-        private string shape;
-        private Color shapeColor;
-        private Color backgroundColor;
-        Brush brush;
-        Brush brush1;
-        Pen pen1;
-        private int startDegree;
-        private int endDegree;
-        private bool outLine = false;
-        private List<List<RectangleF>> rectGridF;
-        private List<List<Rectangle>> rectGrid;
-        // sized for up to 4k monitor (3840/24px + 1)
-        private int[,] gridState = new int[161, 161];
-        private int[,] gridStateNew = new int[161, 161];
-
+        private ScreenSaverDict screenSaverDict;
 
         public ScreenSaverForm(Rectangle Bounds)
         {
@@ -67,10 +34,31 @@ namespace ScreenSaverGameofLife
             this.Bounds = Bounds;
         }
 
+        public ScreenSaverForm(IntPtr PreviewWndHandle)
+        {
+            InitializeComponent();
+
+            // Set the preview window as the parent of this window
+            SetParent(this.Handle, PreviewWndHandle);
+
+            // Make this a child window so it will close when the parent dialog closes
+            // GWL_STYLE = -16, WS_CHILD = 0x40000000
+            SetWindowLong(this.Handle, -16, new IntPtr(GetWindowLong(this.Handle, -16) | 0x40000000));
+
+            // Place our window inside the parent
+            GetClientRect(PreviewWndHandle, out Rectangle ParentRect);
+            Size = ParentRect.Size;
+            Location = new Point(0, 0);
+
+            previewMode = true;
+        }
+
+
         private void ScreenSaverForm_Load(object sender, EventArgs e)
         {
             Cursor.Hide();
             TopMost = true;
+            screenSaverDict = new ScreenSaverDict();
 
             // Use the string from the Registry if it exists
             RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverGameofLife");
@@ -79,22 +67,19 @@ namespace ScreenSaverGameofLife
                 try
                 {
                     // Get saved screensaver params
-                    shape = (string)key.GetValue("shape");
+                    screenSaverDict.Shape = (string)key.GetValue("shape");
                     switch ((string)key.GetValue("outline"))
                     {
                         case "true":
-                            outLine = true;
-                            break;
-                        case "false":
-                            outLine = false;
+                            screenSaverDict.Outline = true;
                             break;
                     }
-                    cellSize = (int)key.GetValue("shapeSize");
-                    borderSize = (int)key.GetValue("borderSize");
-                    shapeColor = Color.FromName((string)key.GetValue("shapeColor"));
-                    backgroundColor = Color.FromName((string)key.GetValue("backColor"));
-                    startDegree = (int)key.GetValue("startDegree");
-                    endDegree = (int)key.GetValue("endDegree");
+                    screenSaverDict.ShapeSize = (int)key.GetValue("shapeSize");
+                    screenSaverDict.BorderSize = (int)key.GetValue("borderSize");
+                    screenSaverDict.ShapeColor = Color.FromName((string)key.GetValue("shapeColor"));
+                    screenSaverDict.BackgroundColor = Color.FromName((string)key.GetValue("backColor"));
+                    screenSaverDict.StartAngle = (int)key.GetValue("startDegree");
+                    screenSaverDict.EndAngle = (int)key.GetValue("endDegree");
                 }
                 catch (Exception ex)
                 {
@@ -102,142 +87,132 @@ namespace ScreenSaverGameofLife
                         "ScreenSaverGameofLife",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Exclamation);
-                    shape = "rectangle";
-                    cellSize = 24;
-                    borderSize = 8;
-                    shapeColor = Color.Lime;
-                    backgroundColor = Color.Black;
+                    screenSaverDict.Shape = "rectangle";
+                    screenSaverDict.ShapeSize = 24;
+                    screenSaverDict.BorderSize = 8;
+                    screenSaverDict.ShapeColor = Color.Lime;
+                    screenSaverDict.BackgroundColor = Color.Black;
                 }
             }
             else
             {
-                shape = "rectangle";
-                cellSize = 24;
-                borderSize = 8;
-                shapeColor = Color.Lime;
-                backgroundColor = Color.Black;
+                screenSaverDict.Shape = "rectangle";
+                screenSaverDict.ShapeSize = 24;
+                screenSaverDict.BorderSize = 8;
+                screenSaverDict.ShapeColor = Color.Lime;
+                screenSaverDict.BackgroundColor = Color.Black;
             }
 
-            // minimum must have settings
-            if (endDegree == 0)
-                endDegree = 45;
-            if (cellSize < 24)
-                cellSize = 24;
-            if (borderSize > cellSize)
-                borderSize = cellSize - 2;
+            screenSaverDict.BackgroundBrush = new SolidBrush(screenSaverDict.BackgroundColor);
+            screenSaverDict.ShapeBrush = new SolidBrush(screenSaverDict.ShapeColor);
+            screenSaverDict.ShapePen = new Pen(screenSaverDict.ShapeColor, screenSaverDict.BorderSize) { Alignment = System.Drawing.Drawing2D.PenAlignment.Center };
+            screenSaverDict.Cols = Math.Max(1, (Bounds.Width / screenSaverDict.ShapeSize) + 1);
+            screenSaverDict.Rows = Math.Max(1, (Bounds.Height / screenSaverDict.ShapeSize) + 1);
+            screenSaverDict.State = new int[screenSaverDict.Cols, screenSaverDict.Rows];
+            screenSaverDict.StateNew = new int[screenSaverDict.Cols, screenSaverDict.Rows];
 
-            brush = new SolidBrush(backgroundColor);
-            brush1 = new SolidBrush(shapeColor);
-            pen1 = new Pen(shapeColor, borderSize) { Alignment = System.Drawing.Drawing2D.PenAlignment.Center };
-
-            cols = Math.Max(1, (Bounds.Width / cellSize) + 1);
-            rows = Math.Max(1, (Bounds.Height / cellSize) + 1);
+            InitializeGrid();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.FillRectangle(brush, Bounds);
-            if (!initialized)
+            g.FillRectangle(screenSaverDict.BackgroundBrush, Bounds);
+            for (int i = 0; i < screenSaverDict.Cols; i++)
             {
-                initialized = true;
-                InitializeGrid();
-            }
-            for (int i = 0; i < cols; i++)
-            {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < screenSaverDict.Rows; j++)
                 {
-                    switch (shape)
+                    switch (screenSaverDict.Shape)
                     {
                         case "Square":
-                            switch (outLine)
+                            switch (screenSaverDict.Outline)
                             {
                                 case true:
-                                    switch (gridState[i, j])
+                                    switch (screenSaverDict.State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(brush, rectGrid[i][j]);
+                                            g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.Grid[i][j]);
                                             break;
                                         case 1:
-                                            g.DrawRectangle(pen1, rectGrid[i][j]);
+                                            g.DrawRectangle(screenSaverDict.ShapePen, screenSaverDict.Grid[i][j]);
                                             break;
                                     }
                                     break;
                                 case false:
-                                    switch (gridState[i, j])
+                                    switch (screenSaverDict.State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(brush, rectGrid[i][j]);
+                                            g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.Grid[i][j]);
                                             break;
                                         case 1:
-                                            g.FillRectangle(brush1, rectGrid[i][j]);
+                                            g.FillRectangle(screenSaverDict.ShapeBrush, screenSaverDict.Grid[i][j]);
                                             break;
                                     }
                                     break;
                             }
                             break;
                         case "Circle":
-                            switch (outLine)
+                            switch (screenSaverDict.Outline)
                             {
                                 case true:
-                                    switch (gridState[i, j])
+                                    switch (screenSaverDict.State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(brush, rectGridF[i][j]);
+                                            g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.GridF[i][j]);
                                             break;
                                         case 1:
-                                            g.DrawArc(pen1, rectGridF[i][j], 0, 360);
+                                            g.DrawArc(screenSaverDict.ShapePen, screenSaverDict.GridF[i][j], 0, 360);
                                             break;
                                     }
                                     break;
                                 case false:
-                                    switch (gridState[i, j])
+                                    switch (screenSaverDict.State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(brush, rectGridF[i][j]);
+                                            g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.GridF[i][j]);
                                             break;
                                         case 1:
-                                            g.FillEllipse(brush1, rectGridF[i][j]);
+                                            g.FillEllipse(screenSaverDict.ShapeBrush, screenSaverDict.GridF[i][j]);
                                             break;
                                     }
                                     break;
                             }
                             break;
                         case "Fish Scales":
-                            switch (gridState[i, j])
+                            switch (screenSaverDict.State[i, j])
                             {
                                 case 0:
-                                    g.FillRectangle(brush, rectGridF[i][j]);
+                                    g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.GridF[i][j]);
                                     break;
                                 case 1:
-                                    g.DrawBezier(pen1,
-                                        rectGridF[i][j].X, rectGridF[i][j].Y,
-                                        rectGridF[i][j].X + cellSize - borderSize, rectGridF[i][j].Y,
-                                        rectGridF[i][j].X + cellSize - borderSize, rectGridF[i][j].Y + cellSize - borderSize,
-                                        rectGridF[i][j].X, rectGridF[i][j].Y + cellSize - borderSize);
+                                    g.DrawBezier(screenSaverDict.ShapePen,
+                                        screenSaverDict.GridF[i][j].X, screenSaverDict.GridF[i][j].Y,
+                                        screenSaverDict.GridF[i][j].X + screenSaverDict.ShapeSize - screenSaverDict.BorderSize, screenSaverDict.GridF[i][j].Y,
+                                        screenSaverDict.GridF[i][j].X + screenSaverDict.ShapeSize - screenSaverDict.BorderSize, screenSaverDict.GridF[i][j].Y + screenSaverDict.ShapeSize - screenSaverDict.BorderSize,
+                                        screenSaverDict.GridF[i][j].X, screenSaverDict.GridF[i][j].Y + screenSaverDict.ShapeSize - screenSaverDict.BorderSize);
                                     break;
                             }
                             break;
                         case "Arc":
-                            switch (gridState[i, j])
+                            switch (screenSaverDict.State[i, j])
                             {
                                 case 0:
-                                    g.FillRectangle(brush, rectGridF[i][j]);
+                                    g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.GridF[i][j]);
                                     break;
                                 case 1:
-                                    g.DrawArc(pen1, rectGridF[i][j], startDegree, endDegree);
+                                    g.DrawArc(screenSaverDict.ShapePen, screenSaverDict.GridF[i][j], screenSaverDict.StartAngle, screenSaverDict.EndAngle);
                                     break;
                             }
                             break;
                         case "Stingray":
-                            switch (gridState[i, j])
+                            switch (screenSaverDict.State[i, j])
                             {
                                 case 0:
-                                    g.FillRectangle(brush, rectGridF[i][j]);
+                                    g.FillRectangle(screenSaverDict.BackgroundBrush, screenSaverDict.GridF[i][j]);
                                     break;
                                 case 1:
-                                    g.DrawLine(pen1, rectGridF[i][j].X + cellSize, rectGridF[i][j].Y + cellSize, rectGridF[i][j].X + (cellSize / 2), rectGridF[i][j].Y + (cellSize / 2));
-                                    g.DrawPie(pen1, rectGridF[i][j], 90, 270);
+                                    g.DrawLine(screenSaverDict.ShapePen, screenSaverDict.GridF[i][j].X + screenSaverDict.ShapeSize, screenSaverDict.GridF[i][j].Y + screenSaverDict.ShapeSize, screenSaverDict.GridF[i][j].X + (screenSaverDict.ShapeSize / 2), screenSaverDict.GridF[i][j].Y + (screenSaverDict.ShapeSize / 2));
+                                    g.DrawPie(screenSaverDict.ShapePen, screenSaverDict.GridF[i][j], 90, 270);
                                     break;
                             }
                             break;
@@ -250,29 +225,30 @@ namespace ScreenSaverGameofLife
 
         private void InitializeGrid()
         {
-            switch (shape)
+            switch (screenSaverDict.Shape)
             {
                 case "Square":
-                    rectGrid = new List<List<Rectangle>>();
+                    screenSaverDict.Grid = new List<List<Rectangle>>();
                     RectangleShape();
                     break;
                 case "Circle":
-                    rectGridF = new List<List<RectangleF>>();
+                    screenSaverDict.GridF = new List<List<RectangleF>>();
                     RectangleFShape();
                     break;
                 case "Fish Scales":
-                    rectGridF = new List<List<RectangleF>>();
+                    screenSaverDict.GridF = new List<List<RectangleF>>();
                     RectangleFShape();
                     break;
                 case "Arc":
-                    rectGridF = new List<List<RectangleF>>();
+                    screenSaverDict.GridF = new List<List<RectangleF>>();
                     RectangleFShape();
                     break;
                 case "Stingray":
-                    rectGridF = new List<List<RectangleF>>();
+                    screenSaverDict.GridF = new List<List<RectangleF>>();
                     RectangleFShape();
                     break;
                 default:
+                    screenSaverDict.Grid = new List<List<Rectangle>>();
                     RectangleShape();
                     break;
             }
@@ -280,16 +256,15 @@ namespace ScreenSaverGameofLife
 
         private void RectangleShape()
         {
-            for (int i = 0; i < cols; i++)
+            for (int i = 0; i < screenSaverDict.Cols; i++)
             {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < screenSaverDict.Rows; j++)
                 {
-                    List<Rectangle> list = new List<Rectangle>();
-                    rectGrid.Add(list);
+                    screenSaverDict.Grid.Add(new List<Rectangle>());
                     Rectangle rect = new Rectangle()
                     {
-                        Width = cellSize - borderSize,
-                        Height = cellSize - borderSize
+                        Width = screenSaverDict.ShapeSize - screenSaverDict.BorderSize,
+                        Height = screenSaverDict.ShapeSize - screenSaverDict.BorderSize
                     };
                     if (i == 0 && j == 0)
                     {
@@ -298,39 +273,38 @@ namespace ScreenSaverGameofLife
                     }
                     else if (i > 0 && j > 0)
                     {
-                        rect.X = rectGrid[i - 1][j].X + cellSize;
-                        rect.Y = rectGrid[i][j - 1].Y + cellSize;
+                        rect.X = screenSaverDict.Grid[i - 1][j].X + screenSaverDict.ShapeSize;
+                        rect.Y = screenSaverDict.Grid[i][j - 1].Y + screenSaverDict.ShapeSize;
                     }
                     // left border
                     else if (i < 1 && j > 0)
                     {
                         rect.X = 0;
-                        rect.Y = rectGrid[i][j - 1].Y + cellSize;
+                        rect.Y = screenSaverDict.Grid[i][j - 1].Y + screenSaverDict.ShapeSize;
                     }
                     // top border
                     else if (i > 0 && j < 1)
                     {
-                        rect.X = rectGrid[i - 1][j].X + cellSize;
+                        rect.X = screenSaverDict.Grid[i - 1][j].X + screenSaverDict.ShapeSize;
                         rect.Y = 0;
                     }
-                    rectGrid[i].Add(rect);
-                    gridState[i, j] = rand.Next(0, 2);
+                    screenSaverDict.Grid[i].Add(rect);
+                    screenSaverDict.State[i, j] = rand.Next(0, 2);
                 }
             }
         }
 
         private void RectangleFShape()
         {
-            for (int i = 0; i < cols; i++)
+            for (int i = 0; i < screenSaverDict.Cols; i++)
             {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < screenSaverDict.Rows; j++)
                 {
-                    List<RectangleF> list = new List<RectangleF>();
-                    rectGridF.Add(list);
+                    screenSaverDict.GridF.Add(new List<RectangleF>());
                     RectangleF rect = new RectangleF()
                     {
-                        Width = cellSize - borderSize,
-                        Height = cellSize - borderSize
+                        Width = screenSaverDict.ShapeSize - screenSaverDict.BorderSize,
+                        Height = screenSaverDict.ShapeSize - screenSaverDict.BorderSize
                     };
                     if (i == 0 && j == 0)
                     {
@@ -339,23 +313,23 @@ namespace ScreenSaverGameofLife
                     }
                     else if (i > 0 && j > 0)
                     {
-                        rect.X = rectGridF[i - 1][j].X + cellSize;
-                        rect.Y = rectGridF[i][j - 1].Y + cellSize;
+                        rect.X = screenSaverDict.GridF[i - 1][j].X + screenSaverDict.ShapeSize;
+                        rect.Y = screenSaverDict.GridF[i][j - 1].Y + screenSaverDict.ShapeSize;
                     }
                     // left border
                     else if (i < 1 && j > 0)
                     {
                         rect.X = 0;
-                        rect.Y = rectGridF[i][j - 1].Y + cellSize;
+                        rect.Y = screenSaverDict.GridF[i][j - 1].Y + screenSaverDict.ShapeSize;
                     }
                     // top border
                     else if (i > 0 && j < 1)
                     {
-                        rect.X = rectGridF[i - 1][j].X + cellSize;
+                        rect.X = screenSaverDict.GridF[i - 1][j].X + screenSaverDict.ShapeSize;
                         rect.Y = 0;
                     }
-                    rectGridF[i].Add(rect);
-                    gridState[i, j] = rand.Next(0, 2);
+                    screenSaverDict.GridF[i].Add(rect);
+                    screenSaverDict.State[i, j] = rand.Next(0, 2);
                 }
             }
         }
@@ -365,24 +339,24 @@ namespace ScreenSaverGameofLife
             int countDead = 0;
             int living = 0;
             int livingNew = 0;
-            for (int i = 0; i < cols; i++)
+            for (int i = 0; i < screenSaverDict.Cols; i++)
             {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < screenSaverDict.Rows; j++)
                 {
                     int numNeighbors = SumNeighbors(i, j);
                     if (numNeighbors > 3 || numNeighbors < 2)
-                        gridStateNew[i, j] = 0;
+                        screenSaverDict.StateNew[i, j] = 0;
                     else if (numNeighbors == 3)
-                        gridStateNew[i, j] = 1;
+                        screenSaverDict.StateNew[i, j] = 1;
                     else
-                        gridStateNew[i, j] = gridState[i, j];
+                        screenSaverDict.StateNew[i, j] = screenSaverDict.State[i, j];
                 }
             }
-            for (int i = 0; i < gridStateNew.GetLength(0); i++)
+            for (int i = 0; i < screenSaverDict.StateNew.GetLength(0); i++)
             {
-                for (int j = 0; j < gridStateNew.GetLength(1); j++)
+                for (int j = 0; j < screenSaverDict.StateNew.GetLength(1); j++)
                 {
-                    switch (gridStateNew[i, j])
+                    switch (screenSaverDict.StateNew[i, j])
                     {
                         case 0:
                             countDead++;
@@ -391,42 +365,36 @@ namespace ScreenSaverGameofLife
                             livingNew++;
                             break;
                     }
-                    switch (gridState[i, j])
+                    switch (screenSaverDict.State[i, j])
                     {
                         case 1:
                             living++;
                             break;
                     }
-                    gridState[i, j] = gridStateNew[i, j];
+                    screenSaverDict.State[i, j] = screenSaverDict.StateNew[i, j];
                 }
             }
-            count++;
-            if (countStagnant > countStagnantReSeed || count > countStagnantReSeed*1.5)
+            screenSaverDict.Count++;
+            if (screenSaverDict.Count > screenSaverDict.ResetCountLimit)
             {
-                count = 0;
-                countStagnant = 0;
+                screenSaverDict.Count = 0;
                 ReSeed();
             }
             // ReSeed if screen is all dead
-            else if (countDead == gridStateNew.Length)
+            else if (countDead == screenSaverDict.StateNew.Length)
             {
-                countStagnant = 0;
+                screenSaverDict.Count = 0;
                 ReSeed();
-            }
-            // Set repaint false if screen is stagnant
-            else if (living == livingNew)
-            {
-                countStagnant++;
             }
         }
 
         private void ReSeed()
         {
-            for (int i = 0; i < cols; i++)
+            for (int i = 0; i < screenSaverDict.Cols; i++)
             {
-                for (int j = 0; j < rows; j++)
+                for (int j = 0; j < screenSaverDict.Rows; j++)
                 {
-                    gridState[i, j] = rand.Next(0, 2);
+                    screenSaverDict.State[i, j] = rand.Next(0, 2);
                 }
             }
         }
@@ -444,7 +412,7 @@ namespace ScreenSaverGameofLife
                     {
                         for (int l = 0; l < 2; l++)
                         {
-                            switch (gridState[i + k, j + l])
+                            switch (screenSaverDict.State[i + k, j + l])
                             {
                                 case 1:
                                     n++;
@@ -452,7 +420,7 @@ namespace ScreenSaverGameofLife
                             }
                         }
                     }
-                    switch (gridState[i, j])
+                    switch (screenSaverDict.State[i, j])
                     {
                         case 1:
                             n--;
@@ -460,13 +428,13 @@ namespace ScreenSaverGameofLife
                     }
                 }
                 // bottom
-                if (j > rows - 1)
+                if (j > screenSaverDict.Rows - 1)
                 {
                     for (int k = 0; k < 2; k++)
                     {
                         for (int l = -1; l < 1; l++)
                         {
-                            switch (gridState[i + k, j + l])
+                            switch (screenSaverDict.State[i + k, j + l])
                             {
                                 case 1:
                                     n++;
@@ -474,7 +442,7 @@ namespace ScreenSaverGameofLife
                             }
                         }
                     }
-                    switch (gridState[i, j])
+                    switch (screenSaverDict.State[i, j])
                     {
                         case 1:
                             n--;
@@ -483,7 +451,7 @@ namespace ScreenSaverGameofLife
                 }
             }
             // right corners
-            if (i > rows - 1)
+            if (i > screenSaverDict.Rows - 1)
             {
                 // top
                 if (j < 1)
@@ -492,7 +460,7 @@ namespace ScreenSaverGameofLife
                     {
                         for (int l = 0; l < 2; l++)
                         {
-                            switch (gridState[i + k, j + l])
+                            switch (screenSaverDict.State[i + k, j + l])
                             {
                                 case 1:
                                     n++;
@@ -500,7 +468,7 @@ namespace ScreenSaverGameofLife
                             }
                         }
                     }
-                    switch (gridState[i, j])
+                    switch (screenSaverDict.State[i, j])
                     {
                         case 1:
                             n--;
@@ -508,13 +476,13 @@ namespace ScreenSaverGameofLife
                     }
                 }
                 // bottom
-                if (j > rows - 1)
+                if (j > screenSaverDict.Rows - 1)
                 {
                     for (int k = -1; k < 1; k++)
                     {
                         for (int l = -1; l < 1; l++)
                         {
-                            switch (gridState[i + k, j + l])
+                            switch (screenSaverDict.State[i + k, j + l])
                             {
                                 case 1:
                                     n++;
@@ -522,7 +490,7 @@ namespace ScreenSaverGameofLife
                             }
                         }
                     }
-                    switch (gridState[i, j])
+                    switch (screenSaverDict.State[i, j])
                     {
                         case 1:
                             n--;
@@ -531,13 +499,13 @@ namespace ScreenSaverGameofLife
                 }
             }
             // middle cells
-            if (i > 0 && i < cols && j > 0 && j < rows)
+            if (i > 0 && i < screenSaverDict.Cols - 1 && j > 0 && j < screenSaverDict.Rows - 1)
             {
                 for (int k = -1; k < 2; k++)
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        switch (gridState[i + k, j + l])
+                        switch (screenSaverDict.State[i + k, j + l])
                         {
                             case 1:
                                 n++;
@@ -545,7 +513,7 @@ namespace ScreenSaverGameofLife
                         }
                     }
                 }
-                switch (gridState[i, j])
+                switch (screenSaverDict.State[i, j])
                 {
                     case 1:
                         n--;
@@ -553,13 +521,13 @@ namespace ScreenSaverGameofLife
                 }
             }
             // left border
-            if (i < 1 && j > 0 && j < rows)
+            if (i < 1 && j > 0 && j < screenSaverDict.Rows - 1)
             {
                 for (int k = 0; k < 2; k++)
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        switch (gridState[i + k, j + l])
+                        switch (screenSaverDict.State[i + k, j + l])
                         {
                             case 1:
                                 n++;
@@ -567,7 +535,7 @@ namespace ScreenSaverGameofLife
                         }
                     }
                 }
-                switch (gridState[i, j])
+                switch (screenSaverDict.State[i, j])
                 {
                     case 1:
                         n--;
@@ -575,13 +543,13 @@ namespace ScreenSaverGameofLife
                 }
             }
             // right border
-            if (i > cols - 1 && j > 0 && j < rows)
+            if (i > screenSaverDict.Cols - 2 && j > 0 && j < screenSaverDict.Rows - 1)
             {
                 for (int k = -1; k < 1; k++)
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        switch (gridState[i + k, j + l])
+                        switch (screenSaverDict.State[i + k, j + l])
                         {
                             case 1:
                                 n++;
@@ -589,7 +557,7 @@ namespace ScreenSaverGameofLife
                         }
                     }
                 }
-                switch (gridState[i, j])
+                switch (screenSaverDict.State[i, j])
                 {
                     case 1:
                         n--;
@@ -597,13 +565,13 @@ namespace ScreenSaverGameofLife
                 }
             }
             // top border
-            if (i > 0 && i < cols - 1 && j < 1)
+            if (i > 0 && i < screenSaverDict.Cols - 1 && j < 1)
             {
                 for (int k = -1; k < 2; k++)
                 {
                     for (int l = 0; l < 2; l++)
                     {
-                        switch (gridState[i + k, j + l])
+                        switch (screenSaverDict.State[i + k, j + l])
                         {
                             case 1:
                                 n++;
@@ -611,7 +579,7 @@ namespace ScreenSaverGameofLife
                         }
                     }
                 }
-                switch (gridState[i, j])
+                switch (screenSaverDict.State[i, j])
                 {
                     case 1:
                         n--;
@@ -619,13 +587,13 @@ namespace ScreenSaverGameofLife
                 }
             }
             // bottom border
-            if (i > 0 && i < cols && j > rows - 1)
+            if (i > 0 && i < screenSaverDict.Cols - 1 && j > screenSaverDict.Rows - 2)
             {
                 for (int k = -1; k < 2; k++)
                 {
                     for (int l = -1; l < 1; l++)
                     {
-                        switch (gridState[i + k, j + l])
+                        switch (screenSaverDict.State[i + k, j + l])
                         {
                             case 1:
                                 n++;
@@ -633,7 +601,7 @@ namespace ScreenSaverGameofLife
                         }
                     }
                 }
-                switch (gridState[i, j])
+                switch (screenSaverDict.State[i, j])
                 {
                     case 1:
                         n--;
@@ -675,23 +643,28 @@ namespace ScreenSaverGameofLife
                 }
             }
         }
-        public ScreenSaverForm(IntPtr PreviewWndHandle)
+
+        private class ScreenSaverDict
         {
-            InitializeComponent();
-
-            // Set the preview window as the parent of this window
-            SetParent(this.Handle, PreviewWndHandle);
-
-            // Make this a child window so it will close when the parent dialog closes
-            // GWL_STYLE = -16, WS_CHILD = 0x40000000
-            SetWindowLong(this.Handle, -16, new IntPtr(GetWindowLong(this.Handle, -16) | 0x40000000));
-
-            // Place our window inside the parent
-            GetClientRect(PreviewWndHandle, out Rectangle ParentRect);
-            Size = ParentRect.Size;
-            Location = new Point(0, 0);
-
-            previewMode = true;
+            public string Shape { get; set; }
+            public Color ShapeColor { get; set; }
+            public Color BackgroundColor { get; set; }
+            public int Cols { get; set; }
+            public int Rows { get; set; }
+            public int ShapeSize { get; set; }
+            public int BorderSize { get; set; }
+            public Brush ShapeBrush { get; set; }
+            public Brush BackgroundBrush { get; set; }
+            public Pen ShapePen { get; set; }
+            public int StartAngle { get; set; }
+            public int EndAngle { get; set; }
+            public int[,] State { get; set; }
+            public int[,] StateNew { get; set; }
+            public int Count { get; set; }
+            public int ResetCountLimit { get; set; } = 960;
+            public bool Outline { get; set; } = false;
+            public List<List<Rectangle>> Grid { get; set; }
+            public List<List<RectangleF>> GridF { get; set; }
         }
     }
 }
