@@ -4,7 +4,6 @@ using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Net.NetworkInformation;
 
 
 namespace ScreenSaverFallingCode
@@ -33,28 +32,39 @@ namespace ScreenSaverFallingCode
             "\u30F0","\u30F1","\u30F2","\u30F3","\u30F4","\u30F5","\u30F6","\u30F7","\u30F8","\u30F9","\u30FA","\u30FB","\u30FC","\u30FD","\u30FE","\u30FF",
             "0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"
         };
-        private List<List<int>> RaindropListSXY = new List<List<int>>();
         private List<List<string>> RaintrailList = new List<List<string>>();
+        private List<List<int>> RaindropListSXY = new List<List<int>>();
         private List<string> RaindropList = new List<string>();
         private readonly static Random rand = new Random();
         private readonly bool previewMode = false;
-        private readonly int FontSize = 20;
-        private readonly int Gap = 20 / 3;
+        private int minTrailLength = 24;
+        private int maxTrailLength = 32;
         private Color BackgroundColor;
         private Color RaintrailColor;
         private Brush RaintrailBrush;
         private Color RaindropColor;
         private Brush RaindropBrush;
         private Font RaindropFont;
+        private int maxSpeed = 20;
+        private int FontSize = 20;
+        private int Gap = 6;
+        private int minSpeed = 2;
+        private int WindowHeight;
         private string FontType;
+        private int UpperBound;
+        private int LowerBound;
         private int Cols;
 
         public ScreenSaverForm(Rectangle Bounds)
         {
             InitializeComponent();
             StartPosition = FormStartPosition.Manual;
-            DoubleBuffered = true;
+            WindowState = FormWindowState.Maximized;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint , true);
             this.Bounds = Bounds;
+            WindowHeight = Bounds.Height;
+            UpperBound = -WindowHeight;
+            LowerBound = WindowHeight * 2;
         }
 
         public ScreenSaverForm(IntPtr PreviewWndHandle)
@@ -73,6 +83,16 @@ namespace ScreenSaverFallingCode
             Size = ParentRect.Size;
             Location = new Point(0, 0);
 
+            StartPosition = FormStartPosition.Manual;
+            WindowState = FormWindowState.Maximized;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            FontSize = 3;
+            Gap = 3 / 3;
+            minSpeed = 1;
+            maxSpeed = 5;
+            WindowHeight = Size.Height;
+            UpperBound = -WindowHeight * 2;
+            LowerBound = WindowHeight * 3;
             previewMode = true;
         }
 
@@ -125,33 +145,22 @@ namespace ScreenSaverFallingCode
             for (int i = 0; i < Cols; i++)
             {
                 RaindropList.Add(characters[rand.Next(0, characters.Count)]);
-                int n1;
-                int n2;
-                if (!previewMode)
-                {
-                    n1 = 16;
-                    n2 = Bounds.Height / (FontSize + Gap / 2);
-                }
-                else
-                {
-                    n1 = 1;
-                    n2 = Bounds.Height;
-                }
-                int trailLength = rand.Next(n1, n2);
+                int trailLength = rand.Next(minTrailLength, maxTrailLength);
                 List<string> list = new List<string>();
                 for (int j = 0; j < trailLength; j++)
                     list.Add(characters[rand.Next(0, characters.Count)]);
                 RaintrailList.Add(list);
-                List<int> sxy = new List<int>();
-                // speed
-                sxy.Add(rand.Next(2, 20));
+                List<int> sxy = new List<int>()
+                {
+                    rand.Next(minSpeed, maxSpeed)
+                };
                 // x
                 if (i < 1)
                     sxy.Add(0);
                 else
-                    sxy.Add(RaindropListSXY[i - 1][1] + FontSize + Gap);
+                    sxy.Add(RaindropListSXY[i - 1][1] + FontSize + Gap*3);
                 // y
-                sxy.Add(rand.Next(-Bounds.Height, -FontSize));
+                sxy.Add(rand.Next(UpperBound, -FontSize));
                 RaindropListSXY.Add(sxy);
             }
         }
@@ -160,7 +169,9 @@ namespace ScreenSaverFallingCode
         {
             for (int i = 0; i < Cols; i++)
             {
-                if (RaindropListSXY[i][2] + RaindropListSXY[i][0] < Bounds.Height * 2)
+                if (rand.Next(0, 200) < 1)
+                    RaindropListSXY[i][0] = rand.Next(minSpeed, maxSpeed);
+                if (RaindropListSXY[i][2] + RaindropListSXY[i][0] < LowerBound)
                     RaindropListSXY[i][2] += RaindropListSXY[i][0];
                 else
                 {
