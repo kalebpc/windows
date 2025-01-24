@@ -182,6 +182,11 @@
             // BorderNumericUpDown
             // 
             this.BorderNumericUpDown.Location = new System.Drawing.Point(113, 48);
+            this.BorderNumericUpDown.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
             this.BorderNumericUpDown.Name = "BorderNumericUpDown";
             this.BorderNumericUpDown.Size = new System.Drawing.Size(64, 20);
             this.BorderNumericUpDown.TabIndex = 25;
@@ -192,12 +197,12 @@
             this.ShapeNumericUpDown.AutoSize = true;
             this.ShapeNumericUpDown.Location = new System.Drawing.Point(114, 16);
             this.ShapeNumericUpDown.Maximum = new decimal(new int[] {
-            200,
+            50,
             0,
             0,
             0});
             this.ShapeNumericUpDown.Minimum = new decimal(new int[] {
-            24,
+            12,
             0,
             0,
             0});
