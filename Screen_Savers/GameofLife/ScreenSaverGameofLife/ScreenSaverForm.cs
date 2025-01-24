@@ -47,6 +47,7 @@ namespace ScreenSaverGameofLife
             InitializeComponent();
             StartPosition = FormStartPosition.Manual;
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            WindowState = FormWindowState.Maximized;
             this.Bounds = Bounds;
         }
 
