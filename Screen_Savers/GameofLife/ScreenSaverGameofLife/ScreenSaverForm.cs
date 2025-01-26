@@ -22,19 +22,20 @@ namespace ScreenSaverGameofLife
         static extern bool GetClientRect(IntPtr hWnd, out Rectangle lpRect);
 
         private readonly static Random rand = new Random();
-        private readonly int ResetCountLimit = 1250;
+        private int ResetCountLimit;
         private readonly bool previewMode = false;
-        private Color BackgroundColor;
+        private Color BackgroundColor = Color.Black;
         private Brush BackgroundBrush;
         private bool Outline= false;
-        private Color ShapeColor;
+        private Color ShapeColor = Color.Lime;
         private Brush ShapeBrush;
         private RectangleF RectF;
+        private Rectangle Rect;
         private int[,] StateNew;
-        private int BorderSize;
+        private int BorderSize = 8;
         private int StartAngle;
-        private int ShapeSize;
-        private string Shape;
+        private int ShapeSize = 24;
+        private string Shape = "Square";
         private Pen ShapePen;
         private int EndAngle;
         private int[,] State;
@@ -72,7 +73,7 @@ namespace ScreenSaverGameofLife
             BorderSize = 0;
             Cols = Math.Max(1, Size.Width / ShapeSize);
             Rows = Math.Max(1, Size.Height / ShapeSize);
-
+            ResetCountLimit = Size.Width * 4;
             previewMode = true;
         }
 
@@ -86,54 +87,37 @@ namespace ScreenSaverGameofLife
             RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverGameofLife");
             if (key != null)
             {
-                try
-                {
-                    // Get saved screensaver params
-                    Shape = (string)key.GetValue("shape");
-                    switch ((string)key.GetValue("outline"))
-                    {
-                        case "true":
-                            Outline = true;
-                            break;
-                    }
-                    if (!previewMode)
-                    {
-                        ShapeSize = (int)key.GetValue("shapeSize");
-                        BorderSize = (int)key.GetValue("borderSize");
-                    }
-                    ShapeColor = Color.FromName((string)key.GetValue("shapeColor"));
-                    BackgroundColor = Color.FromName((string)key.GetValue("backColor"));
-                    StartAngle = (int)key.GetValue("startDegree");
-                    EndAngle = (int)key.GetValue("endDegree");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message,
-                        "ScreenSaverGameofLife",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Exclamation);
-                    Shape = "rectangle";
-                    if (!previewMode)
-                    {
-                        ShapeSize = 24;
-                        BorderSize = 8;
-                    }
-                    ShapeColor = Color.Lime;
-                    BackgroundColor = Color.Black;
-                }
-            }
-            else
-            {
-                Shape = "rectangle";
+                // Get saved screensaver params
                 if (!previewMode)
                 {
-                    ShapeSize = 24;
-                    BorderSize = 8;
+                    if (key.GetValue("shapeSize") != null)
+                        ShapeSize = (int)key.GetValue("shapeSize");
+                    if (key.GetValue("borderSize") != null)
+                        BorderSize = (int)key.GetValue("borderSize");
                 }
-                ShapeColor = Color.Lime;
-                BackgroundColor = Color.Black;
+                if (key.GetValue("shape") != null)
+                    Shape = (string)key.GetValue("shape");
+                string s = (string)key.GetValue("outline");
+                if (s != null)
+                {
+                    if (s == "true")
+                    {
+                        Outline = true;
+                        if (BorderSize < 1)
+                            BorderSize = 1;
+                    }   
+                }
+                if (key.GetValue("shapeColor") != null)
+                    ShapeColor = Color.FromName((string)key.GetValue("shapeColor"));
+                if (key.GetValue("backColor") != null)
+                    BackgroundColor = Color.FromName((string)key.GetValue("backColor"));
+                if (key.GetValue("startDegree") != null)
+                    StartAngle = (int)key.GetValue("startDegree");
+                if (key.GetValue("endDegree") != null)
+                    EndAngle = (int)key.GetValue("endDegree");
+                if (Shape == "Arc" && BorderSize < 1)
+                    BorderSize = 1;
             }
-
             BackgroundBrush = new SolidBrush(BackgroundColor);
             ShapeBrush = new SolidBrush(ShapeColor);
             ShapePen = new Pen(ShapeColor, BorderSize) { Alignment = System.Drawing.Drawing2D.PenAlignment.Center };
@@ -141,13 +125,27 @@ namespace ScreenSaverGameofLife
             {
                 Cols = Math.Max(1, Bounds.Width / ShapeSize);
                 Rows = Math.Max(1, Bounds.Height / ShapeSize);
+                if (ShapeSize < 13)
+                    ResetCountLimit = Bounds.Width;
+                else
+                    ResetCountLimit = (int)Math.Round((double)(Bounds.Width * .6666667));
             }
             State = new int[Cols, Rows];
             StateNew = new int[Cols, Rows];
+            if (Shape == "Square" && Outline == true)
+            {
+                Rect = new Rectangle()
+                {
+                    X = (int)Math.Round((Bounds.Width % ShapeSize) * .5),
+                    Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5),
+                    Width = ShapeSize - BorderSize,
+                    Height = ShapeSize - BorderSize
+                };
+            }
             RectF = new RectangleF()
             {
-                X = (Bounds.Width % ShapeSize) / 2,
-                Y = (Bounds.Height % ShapeSize) / 2,
+                X = (int)Math.Round((Bounds.Width % ShapeSize) * .5),
+                Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5),
                 Width = ShapeSize - BorderSize,
                 Height = ShapeSize - BorderSize
             };
@@ -160,13 +158,15 @@ namespace ScreenSaverGameofLife
             Graphics g = e.Graphics;
             for (int i = 0; i < Cols; i++)
             {
-                RectangleF rectF = new RectangleF() { X = RectF.X, Y = RectF.Y, Width = RectF.Width, Height = RectF.Height };
                 if (i > 0)
-                    rectF.X = ShapeSize * i;
+                {
+                    RectF.X = ShapeSize * i;
+                    RectF.Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5);
+                }
                 for (int j = 0; j < Rows; j++)
                 {
                     if (j > 0)
-                        rectF.Y = ShapeSize * j;
+                        RectF.Y = ShapeSize * j;
                     switch (Shape)
                     {
                         case "Square":
@@ -176,10 +176,12 @@ namespace ScreenSaverGameofLife
                                     switch (State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(BackgroundBrush, rectF);
+                                            g.FillRectangle(BackgroundBrush, RectF);
                                             break;
                                         case 1:
-                                            g.DrawRectangle(ShapePen, new Rectangle() { X = (int)rectF.X, Y = (int)rectF.Y, Width = (int)rectF.Width, Height = (int)rectF.Height });
+                                            Rect.X = (int)RectF.X;
+                                            Rect.Y = (int)RectF.Y;
+                                            g.DrawRectangle(ShapePen, Rect);
                                             break;
                                     }
                                     break;
@@ -187,10 +189,10 @@ namespace ScreenSaverGameofLife
                                     switch (State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(BackgroundBrush, rectF);
+                                            g.FillRectangle(BackgroundBrush, RectF);
                                             break;
                                         case 1:
-                                            g.FillRectangle(ShapeBrush, rectF);
+                                            g.FillRectangle(ShapeBrush, RectF);
                                             break;
                                     }
                                     break;
@@ -203,10 +205,10 @@ namespace ScreenSaverGameofLife
                                     switch (State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(BackgroundBrush, rectF);
+                                            g.FillRectangle(BackgroundBrush, RectF);
                                             break;
                                         case 1:
-                                            g.DrawArc(ShapePen, rectF, 0, 360);
+                                            g.DrawArc(ShapePen, RectF, 0, 360);
                                             break;
                                     }
                                     break;
@@ -214,10 +216,10 @@ namespace ScreenSaverGameofLife
                                     switch (State[i, j])
                                     {
                                         case 0:
-                                            g.FillRectangle(BackgroundBrush, rectF);
+                                            g.FillRectangle(BackgroundBrush, RectF);
                                             break;
                                         case 1:
-                                            g.FillEllipse(ShapeBrush, rectF);
+                                            g.FillEllipse(ShapeBrush, RectF);
                                             break;
                                     }
                                     break;
@@ -227,14 +229,14 @@ namespace ScreenSaverGameofLife
                             switch (State[i, j])
                             {
                                 case 0:
-                                    g.FillRectangle(BackgroundBrush, rectF);
+                                    g.FillRectangle(BackgroundBrush, RectF);
                                     break;
                                 case 1:
                                     g.DrawBezier(ShapePen,
-                                        rectF.X, rectF.Y,
-                                        rectF.X + ShapeSize - BorderSize, rectF.Y,
-                                        rectF.X + ShapeSize - BorderSize, rectF.Y + ShapeSize - BorderSize,
-                                        rectF.X, rectF.Y + ShapeSize - BorderSize);
+                                        RectF.X + ShapeSize - BorderSize, RectF.Y,
+                                        RectF.X + ShapeSize - BorderSize, RectF.Y + ShapeSize - BorderSize,
+                                        RectF.X, RectF.Y,
+                                        RectF.X, RectF.Y + ShapeSize - BorderSize);
                                     break;
                             }
                             break;
@@ -242,10 +244,10 @@ namespace ScreenSaverGameofLife
                             switch (State[i, j])
                             {
                                 case 0:
-                                    g.FillRectangle(BackgroundBrush, rectF);
+                                    g.FillRectangle(BackgroundBrush, RectF);
                                     break;
                                 case 1:
-                                    g.DrawArc(ShapePen, rectF, StartAngle, EndAngle);
+                                    g.DrawArc(ShapePen, RectF, StartAngle, EndAngle);
                                     break;
                             }
                             break;
@@ -253,17 +255,19 @@ namespace ScreenSaverGameofLife
                             switch (State[i, j])
                             {
                                 case 0:
-                                    g.FillRectangle(BackgroundBrush, rectF);
+                                    g.FillRectangle(BackgroundBrush, RectF);
                                     break;
                                 case 1:
-                                    g.DrawLine(ShapePen, rectF.X + ShapeSize, rectF.Y + ShapeSize, rectF.X + (ShapeSize / 2), rectF.Y + (ShapeSize / 2));
-                                    g.DrawPie(ShapePen, rectF, 90, 270);
+                                    g.DrawLine(ShapePen, RectF.X + ShapeSize, RectF.Y + ShapeSize, RectF.X + (int)Math.Round(ShapeSize * .5), RectF.Y + (int)Math.Round(ShapeSize * .5));
+                                    g.DrawPie(ShapePen, RectF, 90, 270);
                                     break;
                             }
                             break;
                     }
                 }
             }
+            RectF.X = (int)Math.Round((Bounds.Width % ShapeSize) * .5);
+            RectF.Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5);
             CalculateNewLife();
             Invalidate();
         }

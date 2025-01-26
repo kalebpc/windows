@@ -40,29 +40,27 @@ namespace ScreenSaverGameofLife
 
         private void LoadSettings()
         {
-            try
+            PopulateColorCombos();
+            // Get the value stored in the Registry
+            RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverGameofLife");
+            if (key != null)
             {
-                PopulateColorCombos();
-                // Get the value stored in the Registry
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverGameofLife");
-                if (key != null)
-                {
+                if (key.GetValue("shapeColor") != null)
                     PreSelectShapeColor((string)key.GetValue("shapeColor"));
+                if (key.GetValue("backColor") != null)
                     PreSelectBackColor((string)key.GetValue("backColor"));
+                if (key.GetValue("outline") != null)
                     PreSelectOutline((string)key.GetValue("outline"));
+                if (key.GetValue("shape") != null)
                     PreSelectShape((string)key.GetValue("shape"));
+                if (key.GetValue("shapeSize") != null)
                     PreSelectShapeSize((int)key.GetValue("shapeSize"));
+                if (key.GetValue("borderSize") != null)
                     PreSelectBorderSize((int)key.GetValue("borderSize"));
+                if (key.GetValue("startDegree") != null)
                     PreSelectStartAngle((int)key.GetValue("startDegree"));
+                if (key.GetValue("endDegree") != null)
                     PreSelectEndAngle((int)key.GetValue("endDegree"));
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message,
-                    "ScreenSaverGameofLife",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
             }
         }
 
@@ -192,14 +190,14 @@ namespace ScreenSaverGameofLife
 
         private void ShapeNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
-            if (BorderNumericUpDown.Value > ShapeNumericUpDown.Value - 2)
-                BorderNumericUpDown.Value = ShapeNumericUpDown.Value - 2;
+            if (BorderNumericUpDown.Value > ShapeNumericUpDown.Value - 1)
+                BorderNumericUpDown.Value = ShapeNumericUpDown.Value - 1;
         }
 
         private void BorderNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
-            if (BorderNumericUpDown.Value > ShapeNumericUpDown.Value - 2)
-                BorderNumericUpDown.Value = ShapeNumericUpDown.Value - 2;
+            if (BorderNumericUpDown.Value > ShapeNumericUpDown.Value - 1)
+                BorderNumericUpDown.Value = ShapeNumericUpDown.Value - 1;
         }
 
         private void ShapeComboBox_SelectedIndexChanged(object sender, EventArgs e)

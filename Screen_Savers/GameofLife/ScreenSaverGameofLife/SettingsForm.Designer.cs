@@ -202,7 +202,7 @@
             0,
             0});
             this.ShapeNumericUpDown.Minimum = new decimal(new int[] {
-            12,
+            4,
             0,
             0,
             0});
