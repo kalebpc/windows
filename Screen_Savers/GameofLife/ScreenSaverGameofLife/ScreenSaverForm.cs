@@ -42,13 +42,14 @@ namespace ScreenSaverGameofLife
         private int Count;
         private int Cols;
         private int Rows;
+        Point MouseXY = new Point() { X = 0, Y = 0};
 
         public ScreenSaverForm(Rectangle Bounds)
         {
             InitializeComponent();
             StartPosition = FormStartPosition.Manual;
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-            WindowState = FormWindowState.Maximized;
+            //WindowState = FormWindowState.Maximized;
             this.Bounds = Bounds;
         }
 
@@ -150,6 +151,8 @@ namespace ScreenSaverGameofLife
                 Height = ShapeSize - BorderSize
             };
             BackColor = BackgroundColor;
+            PaintPictureBox.Width = Bounds.Width;
+            PaintPictureBox.Height = Bounds.Height;
             ReSeed();
         }
 
@@ -269,7 +272,7 @@ namespace ScreenSaverGameofLife
             RectF.X = (int)Math.Round((Bounds.Width % ShapeSize) * .5);
             RectF.Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5);
             CalculateNewLife();
-            Invalidate();
+            PaintPictureBox.Invalidate();
         }
 
         private void CalculateNewLife()
@@ -549,7 +552,7 @@ namespace ScreenSaverGameofLife
             return n;
         }
 
-        private void ScreenSaverForm_MouseClick(object sender, MouseEventArgs e)
+        private void PaintPictureBox_MouseClick(object sender, MouseEventArgs e)
         {
             if (!previewMode)
             {
@@ -565,20 +568,21 @@ namespace ScreenSaverGameofLife
             }
         }
 
-        private void ScreenSaverForm_MouseMove(object sender, MouseEventArgs e)
+        private void PaintPictureBox_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!MousePosition.IsEmpty)
+            if (!MouseXY.IsEmpty)
             {
-                int mouseLocationX = MousePosition.X;
-                int mouseLocationY = MousePosition.Y;
-                // Terminate if mouse is moved a significant distance
-                if (Math.Abs(mouseLocationX - e.X) > 10 || Math.Abs(mouseLocationY - e.Y) > 10)
-                {
-                    if (!previewMode)
-                    {
-                        Application.Exit();
-                    }
-                }
+                if (MouseXY != new Point(e.X, e.Y))
+                    Application.Exit();
+            }
+            MouseXY = new Point(e.X, e.Y);
+        }
+
+        private void PaintPictureBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (!previewMode)
+            {
+                Application.Exit();
             }
         }
     }
