@@ -22,34 +22,34 @@ namespace ScreenSaverGameofLife
         static extern bool GetClientRect(IntPtr hWnd, out Rectangle lpRect);
 
         private readonly static Random rand = new Random();
-        private int ResetCountLimit;
-        private readonly bool previewMode = false;
+        Point MouseXY = new Point() { X = 0, Y = 0};
         private Color BackgroundColor = Color.Black;
+        private readonly bool previewMode = false;
+        private Color ShapeColor = Color.Lime;
+        private string Shape = "Square";
         private Brush BackgroundBrush;
         private bool Outline= false;
-        private Color ShapeColor = Color.Lime;
+        private int ResetCountLimit;
+        private int ShapeSize = 24;
+        private int BorderSize = 8;
         private Brush ShapeBrush;
         private RectangleF RectF;
-        private Rectangle Rect;
         private int[,] StateNew;
-        private int BorderSize = 8;
+        private Rectangle Rect;
         private int StartAngle;
-        private int ShapeSize = 24;
-        private string Shape = "Square";
         private Pen ShapePen;
         private int EndAngle;
         private int[,] State;
         private int Count;
         private int Cols;
         private int Rows;
-        Point MouseXY = new Point() { X = 0, Y = 0};
 
         public ScreenSaverForm(Rectangle Bounds)
         {
             InitializeComponent();
             StartPosition = FormStartPosition.Manual;
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-            //WindowState = FormWindowState.Maximized;
+            WindowState = FormWindowState.Maximized;
             this.Bounds = Bounds;
         }
 
