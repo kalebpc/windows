@@ -2,6 +2,8 @@
 using System.Drawing;
 using Microsoft.Win32;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 
 
 namespace ScreenSaverFallingCode
@@ -22,7 +24,6 @@ namespace ScreenSaverFallingCode
                 RegistryKey key = Registry.CurrentUser.CreateSubKey("SOFTWARE\\ScreenSaverFallingCode");
                 key.SetValue("backColor", (string)GetBackgroundColor());
                 key.SetValue("raindropColor", GetRaindropColor());
-                key.SetValue("raintrailColor", GetRaintrailColor());
                 key.SetValue("fontType", GetFontType());
             }
             catch (Exception)
@@ -36,32 +37,23 @@ namespace ScreenSaverFallingCode
 
         private void LoadSettings()
         {
-            try
+            PopulateColorCombos();
+            // Get the value stored in the Registry
+            RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverFallingCode");
+            if (key != null)
             {
-                PopulateColorCombos();
-                // Get the value stored in the Registry
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\ScreenSaverFallingCode");
-                if (key != null)
-                {
+                if (key.GetValue("backColor") != null)
                     PreSelectBackColor((string)key.GetValue("backColor"));
+                if (key.GetValue("raindropColor") != null)
                     PreSelectRaindropColor((string)key.GetValue("raindropColor"));
-                    PreSelectRaintrailColor((string)key.GetValue("raintrailColor"));
+                if (key.GetValue("fontType") != null)
                     PreSelectFontType((string)key.GetValue("fontType"));
-                }
-                else
-                {
-                    PreSelectBackColor("Black");
-                    PreSelectRaindropColor("White");
-                    PreSelectRaintrailColor("Green");
-                    PreSelectFontType("Segoe UI");
-                }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(ex.Message,
-                    "ScreenSaverFallingCode",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
+                PreSelectBackColor("Black");
+                PreSelectRaindropColor("White");
+                PreSelectFontType("Segoe UI");
             }
         }
 
@@ -88,11 +80,6 @@ namespace ScreenSaverFallingCode
             RaindropComboBox.Text = color;
         }
 
-        private void PreSelectRaintrailColor(string color)
-        {
-            RainTrailComboBox.Text = color;
-        }
-
         private void PreSelectFontType(string fontName)
         {
             FontLabel.Text = fontName;
@@ -108,11 +95,6 @@ namespace ScreenSaverFallingCode
             return RaindropComboBox.Text;
         }
 
-        private string GetRaintrailColor()
-        {
-            return RainTrailComboBox.Text;
-        }
-
         private string GetFontType()
         {
             return FontLabel.Text;
@@ -126,7 +108,6 @@ namespace ScreenSaverFallingCode
                 {
                     BackgroundComboBox.Items.Add(color);
                     RaindropComboBox.Items.Add(color);
-                    RainTrailComboBox.Items.Add(color);
                 }
             }
             catch (Exception ex)
@@ -141,9 +122,7 @@ namespace ScreenSaverFallingCode
             Font font;
             Color backgroundColor;
             Color raindropColor;
-            Color raintrailColor;
             int x = 45;
-            int y = 65;
             if (FontLabel.Text != "")
                 font = new Font(FontLabel.Text, 20);
             else
@@ -156,19 +135,30 @@ namespace ScreenSaverFallingCode
                 raindropColor = Color.FromName(RaindropComboBox.Text);
             else
                 raindropColor = Color.White;
-            if (RainTrailComboBox.Text != "")
-                raintrailColor = Color.FromName(RainTrailComboBox.Text);
-            else
-                raintrailColor = Color.Green;
             PreviewPictureBox.BackColor = backgroundColor;
             Graphics g = e.Graphics;
-            int decr = y;
-            for (int i = 0; i < 4; i++)
+            Random rand = new Random();
+            List<string> characters = new List<string>
             {
-                g.DrawString("T", font, new SolidBrush(raintrailColor), x, decr);
-                decr -= 20;
+                "\u30A0","\u30A1","\u30A2","\u30A3","\u30A4","\u30A5","\u30A6","\u30A7","\u30A8","\u30A9","\u30AA","\u30AB","\u30AC","\u30AD","\u30AE","\u30AF",
+                "\u30B0","\u30B1","\u30B2","\u30B3","\u30B4","\u30B5","\u30B6","\u30B7","\u30B8","\u30B9","\u30BA","\u30BB","\u30BC","\u30BD","\u30BE","\u30BF",
+                "\u30C0","\u30C1","\u30C2","\u30C3","\u30C4","\u30C5","\u30C6","\u30C7","\u30C8","\u30C9","\u30CA","\u30CB","\u30CC","\u30CD","\u30CE","\u30CF",
+                "\u30D0","\u30D1","\u30D2","\u30D3","\u30D4","\u30D5","\u30D6","\u30D7","\u30D8","\u30D9","\u30DA","\u30DB","\u30DC","\u30DD","\u30DE","\u30DF",
+                "\u30E0","\u30E1","\u30E2","\u30E3","\u30E4","\u30E5","\u30E6","\u30E7","\u30E8","\u30E9","\u30EA","\u30EB","\u30EC","\u30ED","\u30EE","\u30EF",
+                "\u30F0","\u30F1","\u30F2","\u30F3","\u30F4","\u30F5","\u30F6","\u30F7","\u30F8","\u30F9","\u30FA","\u30FB","\u30FC","\u30FD","\u30FE","\u30FF",
+                "0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"
+            };
+            for (int i = 5; i < 100; i+=20)
+            {
+                g.DrawString(characters[rand.Next(0, characters.Count)], font, new SolidBrush(raindropColor), x, i + 3);
             }
-            g.DrawString("R", font, new SolidBrush(raindropColor), x, y + 20);
+            Rectangle rect = new Rectangle()
+            {
+                X = PreviewPictureBox.Left,
+                Y = PreviewPictureBox.Top - 10, Width = PreviewPictureBox.Width,
+                Height = (int)Math.Round(PreviewPictureBox.Height * .6666667)
+            };
+            g.FillRectangle(new LinearGradientBrush(new Point(rect.Left, rect.Bottom), new Point(rect.Left, rect.Top), Color.Transparent, backgroundColor), rect);
         }
 
         private void BackgroundComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -177,11 +167,6 @@ namespace ScreenSaverFallingCode
         }
 
         private void RaindropComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            PreviewPictureBox.Invalidate();
-        }
-
-        private void RainTrailComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             PreviewPictureBox.Invalidate();
         }

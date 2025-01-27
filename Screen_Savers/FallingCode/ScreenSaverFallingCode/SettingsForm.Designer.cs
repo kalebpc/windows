@@ -35,22 +35,20 @@
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.RainTrailComboBox = new System.Windows.Forms.ComboBox();
             this.RaindropComboBox = new System.Windows.Forms.ComboBox();
             this.BackgroundComboBox = new System.Windows.Forms.ComboBox();
             this.PreviewPictureBox = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.FontLabel = new System.Windows.Forms.Label();
             this.FontBrowseButton = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.FontLabel = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PreviewPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // screenSaverTitle
@@ -77,7 +75,7 @@
             // 
             this.okButton.AutoSize = true;
             this.okButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.okButton.Location = new System.Drawing.Point(153, 246);
+            this.okButton.Location = new System.Drawing.Point(266, 182);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(75, 23);
             this.okButton.TabIndex = 4;
@@ -89,7 +87,7 @@
             // 
             this.cancelButton.AutoSize = true;
             this.cancelButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cancelButton.Location = new System.Drawing.Point(234, 246);
+            this.cancelButton.Location = new System.Drawing.Point(266, 205);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 5;
@@ -101,7 +99,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(5, 99);
+            this.label1.Location = new System.Drawing.Point(5, 66);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(77, 13);
             this.label1.TabIndex = 6;
@@ -117,46 +115,25 @@
             this.label3.TabIndex = 19;
             this.label3.Text = "Background Color";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(5, 59);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(79, 13);
-            this.label2.TabIndex = 24;
-            this.label2.Text = "Rain Trail Color";
-            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.RaindropComboBox);
-            this.groupBox2.Controls.Add(this.RainTrailComboBox);
             this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.BackgroundComboBox);
-            this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Location = new System.Drawing.Point(14, 25);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(162, 151);
+            this.groupBox2.Size = new System.Drawing.Size(194, 111);
             this.groupBox2.TabIndex = 28;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Color";
             // 
-            // RainTrailComboBox
-            // 
-            this.RainTrailComboBox.FormattingEnabled = true;
-            this.RainTrailComboBox.Location = new System.Drawing.Point(8, 75);
-            this.RainTrailComboBox.Name = "RainTrailComboBox";
-            this.RainTrailComboBox.Size = new System.Drawing.Size(145, 21);
-            this.RainTrailComboBox.TabIndex = 31;
-            this.RainTrailComboBox.SelectedIndexChanged += new System.EventHandler(this.RainTrailComboBox_SelectedIndexChanged);
-            // 
             // RaindropComboBox
             // 
             this.RaindropComboBox.FormattingEnabled = true;
-            this.RaindropComboBox.Location = new System.Drawing.Point(8, 115);
+            this.RaindropComboBox.Location = new System.Drawing.Point(8, 82);
             this.RaindropComboBox.Name = "RaindropComboBox";
-            this.RaindropComboBox.Size = new System.Drawing.Size(145, 21);
+            this.RaindropComboBox.Size = new System.Drawing.Size(178, 21);
             this.RaindropComboBox.TabIndex = 30;
             this.RaindropComboBox.SelectedIndexChanged += new System.EventHandler(this.RaindropComboBox_SelectedIndexChanged);
             // 
@@ -165,7 +142,7 @@
             this.BackgroundComboBox.FormattingEnabled = true;
             this.BackgroundComboBox.Location = new System.Drawing.Point(8, 35);
             this.BackgroundComboBox.Name = "BackgroundComboBox";
-            this.BackgroundComboBox.Size = new System.Drawing.Size(145, 21);
+            this.BackgroundComboBox.Size = new System.Drawing.Size(178, 21);
             this.BackgroundComboBox.TabIndex = 29;
             this.BackgroundComboBox.SelectedIndexChanged += new System.EventHandler(this.BackgroundComboBox_SelectedIndexChanged);
             // 
@@ -182,32 +159,21 @@
             // 
             this.groupBox1.Controls.Add(this.groupBox4);
             this.groupBox1.Controls.Add(this.FontBrowseButton);
-            this.groupBox1.Location = new System.Drawing.Point(14, 182);
+            this.groupBox1.Location = new System.Drawing.Point(14, 142);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(295, 58);
+            this.groupBox1.Size = new System.Drawing.Size(194, 86);
             this.groupBox1.TabIndex = 29;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Font";
             // 
-            // FontBrowseButton
+            // groupBox4
             // 
-            this.FontBrowseButton.Location = new System.Drawing.Point(214, 19);
-            this.FontBrowseButton.Name = "FontBrowseButton";
-            this.FontBrowseButton.Size = new System.Drawing.Size(75, 23);
-            this.FontBrowseButton.TabIndex = 0;
-            this.FontBrowseButton.Text = "Browse";
-            this.FontBrowseButton.UseVisualStyleBackColor = true;
-            this.FontBrowseButton.Click += new System.EventHandler(this.FontBrowseButton_Click);
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.PreviewPictureBox);
-            this.groupBox3.Location = new System.Drawing.Point(182, 25);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(127, 151);
-            this.groupBox3.TabIndex = 30;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Sample";
+            this.groupBox4.Controls.Add(this.FontLabel);
+            this.groupBox4.Location = new System.Drawing.Point(8, 19);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(174, 31);
+            this.groupBox4.TabIndex = 2;
+            this.groupBox4.TabStop = false;
             // 
             // FontLabel
             // 
@@ -220,14 +186,25 @@
             this.FontLabel.TabIndex = 1;
             this.FontLabel.Text = "label";
             // 
-            // groupBox4
+            // FontBrowseButton
             // 
-            this.groupBox4.Controls.Add(this.FontLabel);
-            this.groupBox4.Location = new System.Drawing.Point(8, 12);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(200, 31);
-            this.groupBox4.TabIndex = 2;
-            this.groupBox4.TabStop = false;
+            this.FontBrowseButton.Location = new System.Drawing.Point(8, 56);
+            this.FontBrowseButton.Name = "FontBrowseButton";
+            this.FontBrowseButton.Size = new System.Drawing.Size(75, 23);
+            this.FontBrowseButton.TabIndex = 0;
+            this.FontBrowseButton.Text = "Browse";
+            this.FontBrowseButton.UseVisualStyleBackColor = true;
+            this.FontBrowseButton.Click += new System.EventHandler(this.FontBrowseButton_Click);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.PreviewPictureBox);
+            this.groupBox3.Location = new System.Drawing.Point(214, 25);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(127, 151);
+            this.groupBox3.TabIndex = 30;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Sample";
             // 
             // SettingsForm
             // 
@@ -235,7 +212,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(327, 283);
+            this.ClientSize = new System.Drawing.Size(356, 242);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupBox2);
@@ -245,14 +222,15 @@
             this.Controls.Add(this.screenSaverTitle);
             this.Name = "SettingsForm";
             this.Padding = new System.Windows.Forms.Padding(0, 0, 15, 15);
+            this.ShowIcon = false;
             this.Text = "Settings";
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PreviewPictureBox)).EndInit();
             this.groupBox1.ResumeLayout(false);
-            this.groupBox3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -266,10 +244,8 @@
         private System.Windows.Forms.FontDialog fontDialog1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.PictureBox PreviewPictureBox;
-        private System.Windows.Forms.ComboBox RainTrailComboBox;
         private System.Windows.Forms.ComboBox RaindropComboBox;
         private System.Windows.Forms.ComboBox BackgroundComboBox;
         private System.Windows.Forms.GroupBox groupBox1;
