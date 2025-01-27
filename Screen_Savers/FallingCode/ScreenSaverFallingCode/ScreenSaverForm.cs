@@ -127,6 +127,7 @@ namespace ScreenSaverFallingCode
             Cols = Math.Max(1, (WindowWidth / (FontSize + Gap)) + 1);
             DrawBitmap = new Bitmap(WindowWidth, WindowHeight);
             G = Graphics.FromImage(DrawBitmap);
+            G.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
             G.FillRectangle(new SolidBrush(BackgroundColor), new Rectangle(0,0,DrawBitmap.Width,DrawBitmap.Height));
             PaintPictureBox.Image = DrawBitmap;
             MoveTimer.Enabled = true;
