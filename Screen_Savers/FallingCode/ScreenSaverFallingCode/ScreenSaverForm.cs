@@ -23,7 +23,7 @@ namespace ScreenSaverFallingCode
         [DllImport("user32.dll")]
         static extern bool GetClientRect(IntPtr hWnd, out Rectangle lpRect);
 
-        public readonly List<string> characters = new List<string>
+        private readonly List<string> characters = new List<string>
         {
             "\u30A0","\u30A1","\u30A2","\u30A3","\u30A4","\u30A5","\u30A6","\u30A7","\u30A8","\u30A9","\u30AA","\u30AB","\u30AC","\u30AD","\u30AE","\u30AF",
             "\u30B0","\u30B1","\u30B2","\u30B3","\u30B4","\u30B5","\u30B6","\u30B7","\u30B8","\u30B9","\u30BA","\u30BB","\u30BC","\u30BD","\u30BE","\u30BF",
@@ -34,23 +34,27 @@ namespace ScreenSaverFallingCode
             "0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"
         };
         private List<List<int>> RaindropListXY = new List<List<int>>();
+        private Point MouseXY = new Point() { X = 0, Y = 0 };
         private readonly static Random Rand = new Random();
-        Point MouseXY = new Point() { X = 0, Y = 0 };
         private readonly bool previewMode = false;
+        private readonly int FontSize = 12;
         private Color BackgroundColor;
         private Color RaindropColor;
         private Font RaindropFont;
         private Bitmap DrawBitmap;
-        private readonly int FontSize = 12;
         private int WindowHeight;
         private int WindowWidth;
         private string FontType;
         private Rectangle Rect;
         private int UpperBound;
-        private int Gap;
         private Graphics G;
         private int Cols;
+        private int Gap;
 
+        /// <summary>
+        /// Create screen saver form size of Screen (Monitor).
+        /// </summary>
+        /// <param name="Bounds">ScreenBounds represented as a Rectangle</param>
         public ScreenSaverForm(Rectangle Bounds)
         {
             InitializeComponent();
@@ -60,10 +64,14 @@ namespace ScreenSaverFallingCode
             this.Bounds = Bounds;
             WindowHeight = Bounds.Height;
             WindowWidth = Bounds.Width;
-            Gap = FontSize / 4;
+            Gap = FontSize / 2;
             UpperBound = -WindowHeight * 2;
         }
 
+        /// <summary>
+        /// Create screen saver form size of 'Screen Savers settings' Peek Window.
+        /// </summary>
+        /// <param name="PreviewWndHandle">Pointer to 'Screen Savers settings' Peek Window</param>
         public ScreenSaverForm(IntPtr PreviewWndHandle)
         {
             InitializeComponent();
@@ -115,17 +123,17 @@ namespace ScreenSaverFallingCode
                 BackgroundColor = Color.Black;
             }
             RaindropFont = new Font(FontType, FontSize);
+            DrawBitmap = new Bitmap(WindowWidth, WindowHeight);
             Rect = new Rectangle()
             {
                 X = 0,
                 Y = 0,
                 Width = FontSize * 2,
-                Height = WindowHeight * 2
+                Height = DrawBitmap.Height
             };
             if (previewMode)
                 Rect.Height = WindowHeight;
             Cols = Math.Max(1, (WindowWidth / (FontSize + Gap)) + 1);
-            DrawBitmap = new Bitmap(WindowWidth, WindowHeight);
             G = Graphics.FromImage(DrawBitmap);
             G.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
             G.FillRectangle(new SolidBrush(BackgroundColor), new Rectangle(0,0,DrawBitmap.Width,DrawBitmap.Height));
@@ -143,7 +151,7 @@ namespace ScreenSaverFallingCode
                 if (i < 1)
                     xy.Add(0);
                 else
-                    xy.Add(RaindropListXY[i - 1][0] + FontSize + Gap * 2);
+                    xy.Add(RaindropListXY[i - 1][0] + FontSize + (Gap * 2));
                 // y
                 xy.Add(Rand.Next(UpperBound, -FontSize));
                 RaindropListXY.Add(xy);
@@ -163,7 +171,7 @@ namespace ScreenSaverFallingCode
                 if (RaindropListXY[i][1] + FontSize + Gap < DrawBitmap.Height + DrawBitmap.Height)
                     RaindropListXY[i][1] += FontSize + Gap;
                 else
-                    RaindropListXY[i][1] = Rand.Next(-(int)Math.Round(WindowHeight * .3333333), -FontSize);
+                    RaindropListXY[i][1] = Rand.Next((int)Math.Round(UpperBound * .3333333), -FontSize);
             }
         }
 
@@ -172,8 +180,8 @@ namespace ScreenSaverFallingCode
             for (int i = 0; i < Cols; i++)
             {
                 G.DrawString(characters[Rand.Next(0, characters.Count)], RaindropFont, new SolidBrush(RaindropColor), RaindropListXY[i][0], RaindropListXY[i][1]);
-                Rect.X = RaindropListXY[i][0] - Gap;
-                Rect.Y = RaindropListXY[i][1] - Rect.Height - FontSize * 10;
+                Rect.X = RaindropListXY[i][0];
+                Rect.Y = RaindropListXY[i][1] - Rect.Height - (FontSize * 45);
                 G.FillRectangle(new LinearGradientBrush(new Point(Rect.Left, Rect.Bottom), new Point(Rect.Left, Rect.Top), Color.FromArgb(0, BackgroundColor), BackgroundColor), Rect);
             }
         }
