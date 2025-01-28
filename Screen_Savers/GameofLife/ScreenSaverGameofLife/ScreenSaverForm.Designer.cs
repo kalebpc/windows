@@ -28,8 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.Background = new System.Windows.Forms.PictureBox();
             this.PaintPictureBox = new System.Windows.Forms.PictureBox();
+            this.MoveTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.Background)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PaintPictureBox)).BeginInit();
             this.SuspendLayout();
@@ -56,6 +58,11 @@
             this.PaintPictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PaintPictureBox_MouseMove);
             this.PaintPictureBox.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.PaintPictureBox_PreviewKeyDown);
             // 
+            // MoveTimer
+            // 
+            this.MoveTimer.Interval = 125;
+            this.MoveTimer.Tick += new System.EventHandler(this.MoveTimer_Tick);
+            // 
             // ScreenSaverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -80,6 +87,7 @@
         #endregion
         private System.Windows.Forms.PictureBox Background;
         private System.Windows.Forms.PictureBox PaintPictureBox;
+        private System.Windows.Forms.Timer MoveTimer;
     }
 }
 

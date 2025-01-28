@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using System.Windows;
+using System.Threading;
 using ScreenSaverGameofLife;
 
 namespace ScreenSaverGameofLife
@@ -27,14 +29,15 @@ namespace ScreenSaverGameofLife
         private readonly bool previewMode = false;
         private Color ShapeColor = Color.Lime;
         private string Shape = "Square";
+        private int ResetCountLimit = 4;
         private Brush BackgroundBrush;
         private bool Outline= false;
-        private int ResetCountLimit;
         private int ShapeSize = 24;
         private int BorderSize = 8;
         private Brush ShapeBrush;
         private RectangleF RectF;
         private int[,] StateNew;
+        private int[,] StateOld;
         private Rectangle Rect;
         private int StartAngle;
         private Pen ShapePen;
@@ -74,10 +77,8 @@ namespace ScreenSaverGameofLife
             BorderSize = 0;
             Cols = Math.Max(1, Size.Width / ShapeSize);
             Rows = Math.Max(1, Size.Height / ShapeSize);
-            ResetCountLimit = Size.Width * 4;
             previewMode = true;
         }
-
 
         private void ScreenSaverForm_Load(object sender, EventArgs e)
         {
@@ -126,13 +127,10 @@ namespace ScreenSaverGameofLife
             {
                 Cols = Math.Max(1, Bounds.Width / ShapeSize);
                 Rows = Math.Max(1, Bounds.Height / ShapeSize);
-                if (ShapeSize < 13)
-                    ResetCountLimit = Bounds.Width;
-                else
-                    ResetCountLimit = (int)Math.Round((double)(Bounds.Width * .6666667));
             }
             State = new int[Cols, Rows];
             StateNew = new int[Cols, Rows];
+            StateOld = new int[Cols, Rows];
             if (Shape == "Square" && Outline == true)
             {
                 Rect = new Rectangle()
@@ -154,6 +152,13 @@ namespace ScreenSaverGameofLife
             PaintPictureBox.Width = Bounds.Width;
             PaintPictureBox.Height = Bounds.Height;
             ReSeed();
+            MoveTimer.Enabled = true;
+        }
+
+        private void MoveTimer_Tick(object sender, EventArgs e)
+        {
+            CalculateNewLife();
+            PaintPictureBox.Invalidate();
         }
 
         private void OnPaint(object sender, PaintEventArgs e)
@@ -271,15 +276,10 @@ namespace ScreenSaverGameofLife
             }
             RectF.X = (int)Math.Round((Bounds.Width % ShapeSize) * .5);
             RectF.Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5);
-            CalculateNewLife();
-            PaintPictureBox.Invalidate();
         }
 
         private void CalculateNewLife()
         {
-            int countDead = 0;
-            int living = 0;
-            int livingNew = 0;
             for (int i = 0; i < Cols; i++)
             {
                 for (int j = 0; j < Rows; j++)
@@ -293,40 +293,39 @@ namespace ScreenSaverGameofLife
                         StateNew[i, j] = State[i, j];
                 }
             }
-            for (int i = 0; i < StateNew.GetLength(0); i++)
-            {
-                for (int j = 0; j < StateNew.GetLength(1); j++)
-                {
-                    switch (StateNew[i, j])
-                    {
-                        case 0:
-                            countDead++;
-                            break;
-                        case 1:
-                            livingNew++;
-                            break;
-                    }
-                    switch (State[i, j])
-                    {
-                        case 1:
-                            living++;
-                            break;
-                    }
-                    State[i, j] = StateNew[i, j];
-                }
-            }
-            Count++;
+            bool result = CheckStagnant();
+            if (result)
+                Count++;
             if (Count > ResetCountLimit)
             {
                 Count = 0;
                 ReSeed();
             }
-            // ReSeed if screen is all dead
-            else if (countDead == StateNew.Length)
+            else
             {
-                Count = 0;
-                ReSeed();
+                // copy over values
+                for (int i = 0; i < State.GetLength(0); i++)
+                {
+                    for (int j = 0; j < State.GetLength(1); j++)
+                    {
+                        StateOld[i, j] = State[i, j];
+                        State[i, j] = StateNew[i, j];
+                    }
+                }
             }
+        }
+
+        private bool CheckStagnant()
+        {
+            for (int i = 0; i < State.GetLength(0); i++)
+            {
+                for (int j = 0; j < State.GetLength(1); j++)
+                {
+                    if (StateNew[i, j] != StateOld[i, j])
+                        return false;
+                }
+            }
+            return true;
         }
 
         private void ReSeed()
