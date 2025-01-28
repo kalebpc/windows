@@ -56,11 +56,10 @@
             this.PaintPictureBox.Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);
             this.PaintPictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PaintPictureBox_MouseClick);
             this.PaintPictureBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PaintPictureBox_MouseMove);
-            this.PaintPictureBox.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.PaintPictureBox_PreviewKeyDown);
             // 
             // MoveTimer
             // 
-            this.MoveTimer.Interval = 125;
+            this.MoveTimer.Interval = 72;
             this.MoveTimer.Tick += new System.EventHandler(this.MoveTimer_Tick);
             // 
             // ScreenSaverForm
@@ -76,6 +75,7 @@
             this.Name = "ScreenSaverForm";
             this.Text = "ScreenSaverForm";
             this.Load += new System.EventHandler(this.ScreenSaverForm_Load);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ScreenSaverForm_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.Background)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PaintPictureBox)).EndInit();
             this.ResumeLayout(false);

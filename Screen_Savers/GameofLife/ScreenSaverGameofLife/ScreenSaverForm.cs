@@ -3,6 +3,7 @@ using System.Drawing;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 
 namespace ScreenSaverGameofLife
@@ -495,7 +496,7 @@ namespace ScreenSaverGameofLife
             MouseXY = new Point(e.X, e.Y);
         }
 
-        private void PaintPictureBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        private void ScreenSaverForm_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!previewMode)
             {
