@@ -76,7 +76,6 @@
             this.Name = "ScreenSaverForm";
             this.Text = "ScreenSaverForm";
             this.Load += new System.EventHandler(this.ScreenSaverForm_Load);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ScreenSaverForm_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.Background)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PaintPictureBox)).EndInit();
             this.ResumeLayout(false);

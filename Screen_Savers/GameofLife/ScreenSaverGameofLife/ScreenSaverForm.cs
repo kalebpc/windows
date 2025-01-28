@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using Microsoft.Win32;
-using System.Windows;
-using System.Threading;
-using ScreenSaverGameofLife;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
+
 
 namespace ScreenSaverGameofLife
 {
@@ -23,13 +21,12 @@ namespace ScreenSaverGameofLife
         [DllImport("user32.dll")]
         static extern bool GetClientRect(IntPtr hWnd, out Rectangle lpRect);
 
+        private Point MouseXY = new Point() { X = 0, Y = 0};
         private readonly static Random rand = new Random();
-        Point MouseXY = new Point() { X = 0, Y = 0};
         private Color BackgroundColor = Color.Black;
         private readonly bool previewMode = false;
         private Color ShapeColor = Color.Lime;
         private string Shape = "Square";
-        private int ResetCountLimit = 4;
         private Brush BackgroundBrush;
         private bool Outline= false;
         private int ShapeSize = 24;
@@ -274,6 +271,7 @@ namespace ScreenSaverGameofLife
                     }
                 }
             }
+            // reset RectF location
             RectF.X = (int)Math.Round((Bounds.Width % ShapeSize) * .5);
             RectF.Y = (int)Math.Round((Bounds.Height % ShapeSize) * .5);
         }
@@ -296,7 +294,7 @@ namespace ScreenSaverGameofLife
             bool result = CheckStagnant();
             if (result)
                 Count++;
-            if (Count > ResetCountLimit)
+            if (Count > 4)
             {
                 Count = 0;
                 ReSeed();
@@ -352,20 +350,12 @@ namespace ScreenSaverGameofLife
                     {
                         for (int l = 0; l < 2; l++)
                         {
-                            switch (State[i + k, j + l])
-                            {
-                                case 1:
-                                    n++;
-                                    break;
-                            }
+                            if (State[i + k, j + l] == 1)
+                                n++;
                         }
                     }
-                    switch (State[i, j])
-                    {
-                        case 1:
-                            n--;
-                            break;
-                    }
+                    if (State[i, j] == 1)
+                        n--;
                 }
                 // bottom
                 if (j > Rows - 1)
@@ -374,20 +364,12 @@ namespace ScreenSaverGameofLife
                     {
                         for (int l = -1; l < 1; l++)
                         {
-                            switch (State[i + k, j + l])
-                            {
-                                case 1:
-                                    n++;
-                                    break;
-                            }
+                            if (State[i + k, j + l] == 1)
+                                n++;
                         }
                     }
-                    switch (State[i, j])
-                    {
-                        case 1:
-                            n--;
-                            break;
-                    }
+                    if (State[i, j] == 1)
+                        n--;
                 }
             }
             // right corners
@@ -400,20 +382,12 @@ namespace ScreenSaverGameofLife
                     {
                         for (int l = 0; l < 2; l++)
                         {
-                            switch (State[i + k, j + l])
-                            {
-                                case 1:
-                                    n++;
-                                    break;
-                            }
+                            if (State[i + k, j + l] == 1)
+                                n++;
                         }
                     }
-                    switch (State[i, j])
-                    {
-                        case 1:
-                            n--;
-                            break;
-                    }
+                    if (State[i, j] == 1)
+                        n--;
                 }
                 // bottom
                 if (j > Rows - 1)
@@ -422,20 +396,12 @@ namespace ScreenSaverGameofLife
                     {
                         for (int l = -1; l < 1; l++)
                         {
-                            switch (State[i + k, j + l])
-                            {
-                                case 1:
-                                    n++;
-                                    break;
-                            }
+                            if (State[i + k, j + l] == 1)
+                                n++;
                         }
                     }
-                    switch (State[i, j])
-                    {
-                        case 1:
-                            n--;
-                            break;
-                    }
+                    if (State[i, j] == 1)
+                        n--;
                 }
             }
             // middle cells
@@ -445,20 +411,12 @@ namespace ScreenSaverGameofLife
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        switch (State[i + k, j + l])
-                        {
-                            case 1:
-                                n++;
-                                break;
-                        }
+                        if (State[i + k, j + l] == 1)
+                            n++;
                     }
                 }
-                switch (State[i, j])
-                {
-                    case 1:
-                        n--;
-                        break;
-                }
+                if (State[i, j] == 1)
+                    n--;
             }
             // left border
             if (i < 1 && j > 0 && j < Rows - 1)
@@ -467,20 +425,12 @@ namespace ScreenSaverGameofLife
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        switch (State[i + k, j + l])
-                        {
-                            case 1:
-                                n++;
-                                break;
-                        }
+                        if (State[i + k, j + l] == 1)
+                            n++;
                     }
                 }
-                switch (State[i, j])
-                {
-                    case 1:
-                        n--;
-                        break;
-                }
+                if (State[i, j] == 1)
+                    n--;
             }
             // right border
             if (i > Cols - 2 && j > 0 && j < Rows - 1)
@@ -489,20 +439,12 @@ namespace ScreenSaverGameofLife
                 {
                     for (int l = -1; l < 2; l++)
                     {
-                        switch (State[i + k, j + l])
-                        {
-                            case 1:
-                                n++;
-                                break;
-                        }
+                        if (State[i + k, j + l] == 1)
+                            n++;
                     }
                 }
-                switch (State[i, j])
-                {
-                    case 1:
-                        n--;
-                        break;
-                }
+                if (State[i, j] == 1)
+                    n--;
             }
             // top border
             if (i > 0 && i < Cols - 1 && j < 1)
@@ -511,20 +453,12 @@ namespace ScreenSaverGameofLife
                 {
                     for (int l = 0; l < 2; l++)
                     {
-                        switch (State[i + k, j + l])
-                        {
-                            case 1:
-                                n++;
-                                break;
-                        }
+                        if (State[i + k, j + l] == 1)
+                            n++;
                     }
                 }
-                switch (State[i, j])
-                {
-                    case 1:
-                        n--;
-                        break;
-                }
+                if (State[i, j] == 1)
+                    n--;
             }
             // bottom border
             if (i > 0 && i < Cols - 1 && j > Rows - 2)
@@ -533,33 +467,17 @@ namespace ScreenSaverGameofLife
                 {
                     for (int l = -1; l < 1; l++)
                     {
-                        switch (State[i + k, j + l])
-                        {
-                            case 1:
-                                n++;
-                                break;
-                        }
+                        if (State[i + k, j + l] == 1)
+                            n++;
                     }
                 }
-                switch (State[i, j])
-                {
-                    case 1:
-                        n--;
-                        break;
-                }
+                if (State[i, j] == 1)
+                    n--;
             }
             return n;
         }
 
         private void PaintPictureBox_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (!previewMode)
-            {
-                Application.Exit();
-            }
-        }
-
-        private void ScreenSaverForm_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!previewMode)
             {
