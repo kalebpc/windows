@@ -59,7 +59,7 @@
             // 
             // MoveTimer
             // 
-            this.MoveTimer.Interval = 35;
+            this.MoveTimer.Interval = 72;
             this.MoveTimer.Tick += new System.EventHandler(this.MoveTimer_Tick);
             // 
             // ScreenSaverForm

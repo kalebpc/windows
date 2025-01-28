@@ -163,9 +163,7 @@ namespace ScreenSaverFallingCode
                 if (RaindropListXY[i][1] + FontSize + Gap < DrawBitmap.Height + DrawBitmap.Height)
                     RaindropListXY[i][1] += FontSize + Gap;
                 else
-                {
                     RaindropListXY[i][1] = Rand.Next(-(int)Math.Round(WindowHeight * .3333333), -FontSize);
-                }
             }
         }
 
@@ -183,17 +181,13 @@ namespace ScreenSaverFallingCode
         private void PaintPictureBox_MouseClick(object sender, MouseEventArgs e)
         {
             if (!previewMode)
-            {
                 Application.Exit();
-            }
         }
 
         private void ScreenSaverForm_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!previewMode)
-            {
                 Application.Exit();
-            }
         }
 
         private void PaintPictureBox_MouseMove(object sender, MouseEventArgs e)
@@ -201,7 +195,8 @@ namespace ScreenSaverFallingCode
             if (!MouseXY.IsEmpty)
             {
                 if (MouseXY != new Point(e.X, e.Y))
-                    Application.Exit();
+                    if (!previewMode)
+                        Application.Exit();
             }
             MouseXY = new Point(e.X, e.Y);
         }
