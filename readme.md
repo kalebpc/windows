@@ -10,6 +10,7 @@
 
 ![GameofLifeSettings](assets/png/GameofLifeSettings.png)
 
+<img src="assets/png/GameofLifeSettings.png" alt="foobar" width="auto" height="auto">
 
 
 
