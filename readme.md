@@ -2,13 +2,14 @@
 
 ![FallingCodeGif](windows/assets/gifs/FallingCode.gif)
 
-![FallingCodeSettings](assets/png/FallingCodeSettings.png)
+![FallingCodeSettings](windows/assets/png/FallingCodeSettings.png)
 
 ### [ScreenSaverGameofLife](Screen_Savers/GameofLife/ScreenSaverGameofLife/bin/Debug/)
 
 ![GameofLifeGif](windows/assets/gifs/GameofLife.gif)
 
-![GameofLifeSettings](assets/png/GameofLifeSettings.png)
+![GameofLifeSettings](windows/assets/png/GameofLifeSettings.png)
+
 
 
 
