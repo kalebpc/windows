@@ -1,14 +1,15 @@
-### [ScreenSaverFallingCode](./Screen_Savers/FallingCode/ScreenSaverFallingCode/bin/Debug/)
+### [ScreenSaverFallingCode](Screen_Savers/FallingCode/ScreenSaverFallingCode/bin/Debug/)
 
-![FallingCodeGif](windows/assets/gifs/FallingCode.gif)
+![FallingCodeGif](assets/gifs/FallingCode.gif)
 
-![FallingCodeSettings](windows/assets/png/FallingCodeSettings.png)
+![FallingCodeSettings](assets/png/FallingCodeSettings.png)
 
 ### [ScreenSaverGameofLife](Screen_Savers/GameofLife/ScreenSaverGameofLife/bin/Debug/)
 
-![GameofLifeGif](windows/assets/gifs/GameofLife.gif)
+![GameofLifeGif](assets/gifs/GameofLife.gif)
 
-![GameofLifeSettings](windows/assets/png/GameofLifeSettings.png)
+![GameofLifeSettings](assets/png/GameofLifeSettings.png)
+
 
 
 
