@@ -68,19 +68,18 @@ FOR /f "delims=" %%A IN ('FINDSTR /V :: !PATHBACKUPLISTFILE!') DO (
 @REM -- /xx   : Excluding extra files doesn't delete files from the destination and suppress extra files on logs.
 @REM -- /LOG+ : Append to end of log file.
 ECHO.
-IF %errorlevel% GEQ 16 (ECHO Copy Failed. & GOTO end) ELSE (
-IF %errorlevel% GEQ 8 (ECHO Several files didn't copy. & GOTO end) ELSE (
-IF %errorlevel% EQU 7 (ECHO Files were copied, a file mismatch was present, and additional files were present. & GOTO end) ELSE (
-IF %errorlevel% EQU 6 (ECHO Additional files and mismatched files exist. No files were copied and no failures were encountered meaning that the files already exist in the destination directory. & GOTO end) ELSE (
-IF %errorlevel% EQU 5 (ECHO Some files were copied. Some files were mismatched. No failure was encountered. & GOTO end) ELSE (
-IF %errorlevel% EQU 3 (ECHO Some files were copied. Additional files were present. No failure was encountered. & GOTO end) ELSE (
-IF %errorlevel% EQU 2 (ECHO There are some additional files in the destination directory that aren't present in the source directory. No files were copied. & GOTO end) ELSE (
-IF %errorlevel% EQU 1 (ECHO All files were copied successfully. & GOTO end) ELSE (
-IF %errorlevel% EQU 0 (ECHO No files were copied. No failure was encountered. No files were mismatched. The files already exist in the destination directory; therefore, the copy operation was skipped.)
+IF !ERRORLEVEL! GEQ 16 (ECHO "Copy Failed." & GOTO end) ELSE (
+IF !ERRORLEVEL! GEQ 8 (ECHO Several files didn't copy. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 7 (ECHO Files were copied, a file mismatch was present, and additional files were present. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 6 (ECHO Additional files and mismatched files exist. No files were copied and no failures were encountered meaning that the files already exist in the destination directory. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 5 (ECHO Some files were copied. Some files were mismatched. No failure was encountered. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 3 (ECHO Some files were copied. Additional files were present. No failure was encountered. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 2 (ECHO There are some additional files in the destination directory that aren't present in the source directory. No files were copied. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 1 (ECHO All files were copied successfully. & GOTO end) ELSE (
+IF !ERRORLEVEL! EQU 0 (ECHO No files were copied. No failure was encountered. No files were mismatched. The files already exist in the destination directory; therefore, the copy operation was skipped.)
 ))))))))
 GOTO END
 :MKBACKUPFILE
-MKDIR
 ECHO :: ** List fully qualified paths you want backed up. ** > !PATHBACKUPLISTFILE! & (
     ECHO ::
     ECHO :: ** LINES BEGINING WITH "::" WILL NOT BE BACKED UP **
