@@ -45,7 +45,15 @@ IF NOT EXIST !PATHBACKUPLISTFILE! (
     IF /I "!AREYOUSURE!" NEQ "Y" GOTO END
     GOTO MKBACKUPFILE
 )
-ECHO ====== %DATE% %TIME% ====== >> "!PATHLOGSDIR:"=!\!FILELOG:"=!"
+SET LASTBACKUP=!PATHLOGSDIR:"=!\LastBackup_!FILELOG:"=!
+@REM -- Change the character encoding of the terminal shown
+@CHCP 65001 > !LASTBACKUP!
+FOR /f "tokens=*" %%A IN ('TIME /t') DO SET "BACKUPTIME=%%A"
+(   ECHO -------------------------------------------------------------------------------
+    ECHO    ROBOCOPY     ::     Robust File Copy for Windows
+    ECHO -------------------------------------------------------------------------------
+    ECHO    Started  : !DATE! !BACKUPTIME!
+) >> !LASTBACKUP!
 :SETDESTINATION
 SET /P USERDRIVEINPUT=Enter backup drive ^( c ^| d ^| f ^| ... ^) : 
 @REM -- IF /? for help
@@ -57,16 +65,20 @@ SET DESTINATION=!USERDRIVEINPUT!:\!BACKUPDESTNAME:"=!
 IF NOT EXIST !DESTINATION! ( MKDIR !DESTINATION! ) ELSE ( ECHO !DESTINATION! - Drive located. )
 @REM -- FOR /? for help
 @REM -- ROBOCOPY /? for help
-SET i=0
-FOR /f "delims=" %%A IN ('FINDSTR /V :: !PATHBACKUPLISTFILE!') DO (
-    SET TEMP=%%~dA
+FOR /f "delims=" %%B IN ('FINDSTR /V :: !PATHBACKUPLISTFILE!') DO (
+    SET TEMP=%%~dB
     SET TEMP=!TEMP::=!
-    ROBOCOPY "%%A" "!DESTINATION!\!TEMP!%%~pnxA" /tee /e /z /xjd /LOG+:"!PATHLOGSDIR:"=!\%%~nA_!FILELOG:"=!"
+    ROBOCOPY "%%B" "!DESTINATION!\!TEMP!%%~pnxB" /tee /e /z /xjd /unicode /unilog+:"!PATHLOGSDIR:"=!\%%~nB_!FILELOG:"=!"
 )
 @REM -- /e    : copies subdirs includes empty dirs.
 @REM -- /z    : Copies files in restartable mode.
 @REM -- /xx   : Excluding extra files doesn't delete files from the destination and suppress extra files on logs.
 @REM -- /LOG+ : Append to end of log file.
+FOR /f "tokens=*" %%C IN ('TIME /t') DO SET "BACKUPTIME=%%C"
+(   ECHO    Finished : !DATE! !BACKUPTIME!
+    ECHO.
+    ECHO -------------------------------------------------------------------------------
+) >> !LASTBACKUP!
 ECHO.
 IF !ERRORLEVEL! GEQ 16 (ECHO "Copy Failed." & GOTO end) ELSE (
 IF !ERRORLEVEL! GEQ 8 (ECHO Several files didn't copy. & GOTO end) ELSE (
