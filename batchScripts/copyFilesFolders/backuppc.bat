@@ -8,10 +8,16 @@
 @REM -- 6. Copy directories and files to destination folder.
 @REM -- 7. Displays location of log file, exit message and exit code to terminal.
 
+@REM -- !!!!!!!!!!!! CHECK BACKUP DRIVE FORMAT !!!!!!!!!!!!
+@REM -- Format backup drive to exFat for platform cross compatibility and support for files larger than 4GB.
+
 @REM -- ECHO /? for help
 @ECHO OFF
+@REM -- Code Title --
+ECHO Backuppc © 2025 https://github.com/kalebpc/windows
 @REM -- SETLOCAL /? for help
 SETLOCAL EnableDelayedExpansion
+SET THREADZ=4
 SET INSTALLDIRNAME="Backup_PC"
 SET BACKUPDESTNAME="pcBackup"
 SET BACKUPLISTFILE="backup_list.txt"
@@ -53,7 +59,7 @@ FOR /f "tokens=*" %%A IN ('TIME /t') DO SET "BACKUPTIME=%%A"
     ECHO    ROBOCOPY     ::     Robust File Copy for Windows
     ECHO -------------------------------------------------------------------------------
     ECHO    Started  : !DATE! !BACKUPTIME!
-) >> !LASTBACKUP!
+) > !LASTBACKUP!
 :SETDESTINATION
 SET /P USERDRIVEINPUT=Enter backup drive ^( c ^| d ^| f ^| ... ^) : 
 @REM -- IF /? for help
@@ -62,18 +68,17 @@ IF /I !USERDRIVEINPUT!==!HOMEDRIVE::=! ( ECHO Backup drive must not be same as s
 IF NOT EXIST !USERDRIVEINPUT!:\ ( ECHO The system cannot find the path specified. & GOTO SETDESTINATION )
 SET DESTINATION=!USERDRIVEINPUT!:\!BACKUPDESTNAME:"=!
 @REM -- Checking for existing backup folder on backup drive. Create if not existing
-IF NOT EXIST !DESTINATION! ( MKDIR !DESTINATION! ) ELSE ( ECHO !DESTINATION! - Drive located. )
+IF NOT EXIST !DESTINATION! ( MKDIR !DESTINATION! ) ELSE ( ECHO !DESTINATION!    Drive located. )
 @REM -- FOR /? for help
 @REM -- ROBOCOPY /? for help
 FOR /f "delims=" %%B IN ('FINDSTR /V :: !PATHBACKUPLISTFILE!') DO (
     SET TEMP=%%~dB
     SET TEMP=!TEMP::=!
-    ROBOCOPY "%%B" "!DESTINATION!\!TEMP!%%~pnxB" /tee /e /z /xjd /unicode /unilog+:"!PATHLOGSDIR:"=!\%%~nB_!FILELOG:"=!"
+    ROBOCOPY "%%B" "!DESTINATION!\!TEMP!%%~pnxB" /tee /e /mt:!THREADZ! /z /xjd /unicode /unilog+:"!PATHLOGSDIR:"=!\%%~nB_!FILELOG:"=!"
 )
 @REM -- /e    : copies subdirs includes empty dirs.
 @REM -- /z    : Copies files in restartable mode.
-@REM -- /xx   : Excluding extra files doesn't delete files from the destination and suppress extra files on logs.
-@REM -- /LOG+ : Append to end of log file.
+@REM -- /unilog+ : Append to end of unicode log file.
 FOR /f "tokens=*" %%C IN ('TIME /t') DO SET "BACKUPTIME=%%C"
 (   ECHO    Finished : !DATE! !BACKUPTIME!
     ECHO.
@@ -92,9 +97,9 @@ IF !ERRORLEVEL! EQU 0 (ECHO No files were copied. No failure was encountered. No
 ))))))))
 GOTO END
 :MKBACKUPFILE
-ECHO :: ** List fully qualified paths you want backed up. ** > !PATHBACKUPLISTFILE! & (
+(   ECHO :: ** List fully qualified paths you want backed up. **
     ECHO ::
-    ECHO :: ** LINES BEGINING WITH "::" WILL NOT BE BACKED UP **
+    ECHO :: ** LINES BEGINING WITH ":: " WILL NOT BE BACKED UP **
     ECHO ::
     ECHO :: ** Start your list below **
     ECHO !PATHINSTALLDIR:"=!
