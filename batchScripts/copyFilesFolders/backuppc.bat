@@ -1,3 +1,4 @@
+@REM Backuppc © 2025 https://github.com/kalebpc/windows
 
 @REM -- What this code does.
 @REM -- 1. Check and/or create Backup_PC folder in !USERPROFILE!\AppData\Local\Programs\ directory.
@@ -13,8 +14,6 @@
 
 @REM -- ECHO /? for help
 @ECHO OFF
-@REM -- Code Title --
-ECHO Backuppc © 2025 https://github.com/kalebpc/windows
 @REM -- SETLOCAL /? for help
 SETLOCAL EnableDelayedExpansion
 SET THREADZ=4
