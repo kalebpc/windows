@@ -1,3 +1,4 @@
+@REM Backuppc © 2025 https://github.com/kalebpc/windows
 
 @REM -- What this code does.
 @REM -- 1. Check and/or create Backup_PC folder in !USERPROFILE!\AppData\Local\Programs\ directory.
@@ -13,18 +14,20 @@
 
 @REM -- ECHO /? for help
 @ECHO OFF
-@REM -- Code Title --
-ECHO Backuppc © 2025 https://github.com/kalebpc/windows
 @REM -- SETLOCAL /? for help
 SETLOCAL EnableDelayedExpansion
 SET THREADZ=4
 SET INSTALLDIRNAME="Backup_PC"
 SET BACKUPDESTNAME="pcBackup"
 SET BACKUPLISTFILE="backup_list.txt"
+@REM ** Added for mirror backup
+SET MIRBACKUPLISTFILE="mirror_backup_list.txt"
 SET FILELOG="!BACKUPDESTNAME!.log"
 SET PATHINSTALLDIR="!USERPROFILE!\AppData\Local\Programs\!INSTALLDIRNAME:"=!"
 SET PATHLOGSDIR="!PATHINSTALLDIR:"=!\logs"
 SET PATHBACKUPLISTFILE="!PATHINSTALLDIR:"=!\!BACKUPLISTFILE:"=!"
+@REM ** Added for mirror backup
+SET PATHMIRBACKUPLISTFILE="!PATHINSTALLDIR:"=!\!MIRBACKUPLISTFILE:"=!"
 @REM -- Create !INSTALLDIRNAME! folder in !USERPROFILE!\AppData\Local\Programs\ directory.
 IF NOT EXIST !PATHINSTALLDIR! (
     @REM -- User prompt
@@ -50,6 +53,14 @@ IF NOT EXIST !PATHBACKUPLISTFILE! (
     SET /P AREYOUSURE="Do you want to create it now? (Y/[N])?"
     IF /I "!AREYOUSURE!" NEQ "Y" GOTO END
     GOTO MKBACKUPFILE
+)
+@REM ** Added for mirror backup
+IF NOT EXIST !PATHMIRBACKUPLISTFILE! (
+    @REM -- User prompt
+    ECHO. & ECHO !PATHMIRBACKUPLISTFILE! does not exist. & ECHO.
+    SET /P AREYOUSURE="Do you want to create it now? (Y/[N])?"
+    IF /I "!AREYOUSURE!" NEQ "Y" GOTO END
+    GOTO MKMIRBACKUPFILE
 )
 SET LASTBACKUP=!PATHLOGSDIR:"=!\LastBackup_!FILELOG:"=!
 @REM -- Change the character encoding of the terminal shown
@@ -79,7 +90,14 @@ FOR /f "delims=" %%B IN ('FINDSTR /V :: !PATHBACKUPLISTFILE!') DO (
 @REM -- /e    : copies subdirs includes empty dirs.
 @REM -- /z    : Copies files in restartable mode.
 @REM -- /unilog+ : Append to end of unicode log file.
-FOR /f "tokens=*" %%C IN ('TIME /t') DO SET "BACKUPTIME=%%C"
+@REM ** Added for mirror backup
+FOR /f "delims=" %%C IN ('FINDSTR /V :: !PATHMIRBACKUPLISTFILE!') DO (
+    SET TEMP=%%~dC
+    SET TEMP=!TEMP::=!
+    ROBOCOPY "%%C" "!DESTINATION!\!TEMP!%%~pnxC" /tee /mt:!THREADZ! /z /mir /xjd /unicode /unilog+:"!PATHLOGSDIR:"=!\%%~nC_!FILELOG:"=!"
+)
+@REM -- /mir  : Mirror destination to source. This WILL delete extra files in destination.
+FOR /f "tokens=*" %%D IN ('TIME /t') DO SET "BACKUPTIME=%%D"
 (   ECHO    Finished : !DATE! !BACKUPTIME!
     ECHO.
     ECHO -------------------------------------------------------------------------------
@@ -111,11 +129,31 @@ GOTO END
     ECHO !USERPROFILE!\Pictures
     ECHO !USERPROFILE!\Videos 
 ) >> !PATHBACKUPLISTFILE!
-IF EXIST !PATHBACKUPLISTFILE! ( START notepad !PATHBACKUPLISTFILE! & EXIT ) ELSE ( ECHO. & ECHO Could not create !PATHBACKUPLISTFILE!. )
+IF EXIST !PATHBACKUPLISTFILE! ( START notepad !PATHBACKUPLISTFILE! ) ELSE ( ECHO. & ECHO Could not create !PATHBACKUPLISTFILE!. )
+@REM ** Added for mirror backup
+:MKMIRBACKUPFILE
+IF NOT EXIST !PATHMIRBACKUPLISTFILE! (
+    (   ECHO :: ** List fully qualified paths you want backed up. **
+        ECHO ::
+        ECHO :: ** LINES BEGINING WITH ":: " WILL NOT BE BACKED UP **
+        ECHO ::
+        ECHO :: ** DESTINATION WILL BE MIRRORED TO SOURCE **
+        ECHO :: ** - Anything that gets deleted from computer will also be PERMANENTLY DELETED from backup **
+        ECHO ::
+        ECHO :: ** Start your list below **
+        ECHO !USERPROFILE!\AppData
+        ECHO !USERPROFILE!\Desktop
+        ECHO !USERPROFILE!\Downloads
+        ECHO !USERPROFILE!\Documents
+        ECHO !PATHINSTALLDIR:"=!
+    ) >> !PATHMIRBACKUPLISTFILE!
+    IF EXIST !PATHMIRBACKUPLISTFILE! ( START notepad !PATHMIRBACKUPLISTFILE! & EXIT ) ELSE ( ECHO. & ECHO Could not create !PATHMIRBACKUPLISTFILE!. )
+)
 :END
 ECHO.
 ECHO Exit !ERRORLEVEL!
 ECHO List of backed up files/folders located at !PATHBACKUPLISTFILE!.
+ECHO List of Mirrored files/folders located at  !PATHMIRBACKUPLISTFILE!.
 @REM -- ENDLOCAL /? for help
 ENDLOCAL
 @REM -- PAUSE /? for help
