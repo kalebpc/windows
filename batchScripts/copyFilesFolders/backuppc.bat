@@ -121,10 +121,6 @@ GOTO END
     ECHO ::
     ECHO :: ** Start your list below **
     ECHO !PATHINSTALLDIR:"=!
-    ECHO !USERPROFILE!\AppData
-    ECHO !USERPROFILE!\Desktop
-    ECHO !USERPROFILE!\Downloads
-    ECHO !USERPROFILE!\Documents
     ECHO !USERPROFILE!\Music
     ECHO !USERPROFILE!\Pictures
     ECHO !USERPROFILE!\Videos 
