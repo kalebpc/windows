@@ -10,7 +10,7 @@
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 SET FILENAME="getItemPropertyInstalled"
-FOR /f "delims=" %%I IN ('POWERSHELL "&{Add-Type -AssemblyName System.Windows.Forms; $saveFileDialog=New-Object System.Windows.Forms.SaveFileDialog; $saveFileDialog.RestoreDirectory = true; $saveFileDialog.InitialDirectory="!USERPROFILE!"; $saveFileDialog.Filename=!FILENAME!; $saveFileDialog.Filter='Txt files (*.txt)|*.txt'; $saveFileDialog.FilterIndex=2; $saveFileDialog.CheckPathExists; $saveFileDialog.ShowDialog(); ECHO $saveFileDialog.Filename}"') do set "FILEPATH=%%I"
+FOR /f "delims=" %%I IN ('POWERSHELL "&{Add-Type -AssemblyName System.Windows.Forms; $saveFileDialog=New-Object System.Windows.Forms.SaveFileDialog; $saveFileDialog.RestoreDirectory = true; $saveFileDialog.InitialDirectory='!USERPROFILE!'; $saveFileDialog.Filename=!FILENAME!; $saveFileDialog.Filter='Txt files (*.txt)|*.txt'; $saveFileDialog.FilterIndex=2; $saveFileDialog.CheckPathExists; $saveFileDialog.ShowDialog(); ECHO $saveFileDialog.Filename}"') do set "FILEPATH=%%I"
 IF /i "!FILEPATH!" NEQ "Cancel" (
     FOR /f %%A IN ("!FILEPATH!") DO SET "TEMPPATH=%%~dpA" & SET "TEMPEXT=%%~xA"
     IF /i "!TEMPEXT!" NEQ ".txt" (
