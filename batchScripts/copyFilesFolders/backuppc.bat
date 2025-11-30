@@ -21,7 +21,7 @@ SET THREADZ=4
 SET "INSTALLDIRNAME=Backup_PC"
 SET "PATHINSTALLDIR=!USERPROFILE!\AppData\Local\Programs\!INSTALLDIRNAME!"
 SET "PATHENVFILE=!PATHINSTALLDIR!\.env"
-@REM -- Check for .env file. Set variables. Create .env file if it does not exist.
+@REM -- Create .env file if it does not exist.
 IF NOT EXIST !PATHENVFILE! (
     SET "BACKUPDESTNAME=pcBackup"
     SET "BACKUPLISTFILE=backup_list.txt"
@@ -31,88 +31,27 @@ IF NOT EXIST !PATHENVFILE! (
     SET "PATHBACKUPLISTFILE=!PATHINSTALLDIR!\!BACKUPLISTFILE!"
     SET "PATHMIRBACKUPLISTFILE=!PATHINSTALLDIR!\!MIRBACKUPLISTFILE!"
     ECHO ^|
-    CHOICE /C YN /T 15 /D N /M "Change backup folder name? Current name is '!BACKUPDESTNAME!'."
+    CHOICE /C YN /T 15 /D N /M "Do you want to set custom Backup Folder name? ('N' for Default Setup)"
     IF !ERRORLEVEL! EQU 1 (
         :SETBACKUPDESTNAME
-        SET /p "BACKUPDESTNAME=Set Backup folder name : "
-        IF !ERRORLEVEL! EQU 1 ( GOTO SETBACKUPDESTNAME )
+        SET /p "TEMPBACKUPDESTNAME=Set Backup Folder name : "
+        IF /i "!TEMPBACKUPDESTNAME!" EQU "" ( GOTO SETBACKUPDESTNAME )
+        CHOICE /C YN /T 15 /D N /M "Are you sure you want to change Backup Folder name to '!TEMPBACKUPDESTNAME!'?"
+        IF !ERRORLEVEL! EQU 2 ( GOTO SETBACKUPDESTNAME ) ELSE ( SET "BACKUPDESTNAME=TEMPBACKUPDESTNAME" )
     )
-    :CHANGEBACKUPLIST
-    ECHO ^|
-    CHOICE /C YN /T 15 /D N /M "Change backup list file? Current name is '!PATHBACKUPLISTFILE!'."
-    IF !ERRORLEVEL! EQU 1 (
-        @REM -- Open Savefiledialog to get name and path
-        @REM TODO ...
-        FOR /f "delims=" %%E IN (
-            'POWERSHELL "&{"^
-            "Add-Type -AssemblyName System.Windows.Forms;"^
-            "$saveFileDialog=New-Object System.Windows.Forms.SaveFileDialog;"^
-            "$saveFileDialog.Description='Choose Source Folder to Copy from.';"^
-            "$saveFileDialog.InitialDirectory=[Environment]::GetFolderPath([System.Environment+SpecialFolder]::LocalApplicationData);"^
-            "$saveFileDialog.Filter='Txt files (*.txt)|*.txt';"^
-            "$saveFileDialog.FilterIndex=2;"^
-            "$saveFileDialog.CheckFileExists=true;"^
-            "$saveFileDialog.CheckPathExists=true;"^
-            "$saveFileDialog.RestoreDirectory=true;"^
-            "$saveFileDialog.ShowDialog();"^
-            "ECHO $saveFileDialog.FileName"^
-            "}"'
-        ) DO SET "TEMPPATH=%%E"
-        IF /i "!TEMPPATH!" EQU "Cancel" ( 
-            CHOICE /C YN /T 15 /D N /M "Did you mean to Cancel?"
-            @REM -- May have to revisit this early exit in future
-            IF !ERRORLEVEL! EQU 1 ( EXIT ) ELSE GOTO CHANGEBACKUPLIST
-        )
-        SET "PATHBACKUPLISTFILE=!TEMPPATH!"
-        ECHO ^|
-        ECHO "Backup List File set : !PATHBACKUPLISTFILE!"
-        @REM -- Set PATHBACKUPLISTFILE from full path/filename
-        @REM TODO ...
-        @REM -- Set BACKUPLISTFILE from name
-        @REM TODO ...
-    )
-    :CHANGEMIRRORBACKUPLIST
-    ECHO ^|
-    CHOICE /C YN /T 15 /D N /M "Change MIRROR backup list file? Current name is '!PATHMIRBACKUPLISTFILE!'."
-    IF !ERRORLEVEL! EQU 1 (
-        @REM -- Open Savefiledialog to get name and path
-        @REM TODO ...
-        FOR /f "delims=" %%F IN (
-            'POWERSHELL "&{"^
-            "Add-Type -AssemblyName System.Windows.Forms;"^
-            "$saveFileDialog=New-Object System.Windows.Forms.SaveFileDialog;"^
-            "$saveFileDialog.Description='Choose Source Folder to Copy from.';"^
-            "$saveFileDialog.InitialDirectory=[Environment]::GetFolderPath([System.Environment+SpecialFolder]::LocalApplicationData);"^
-            "$saveFileDialog.Filter='Txt files (*.txt)|*.txt';"^
-            "$saveFileDialog.FilterIndex=2;"^
-            "$saveFileDialog.CheckFileExists=true;"^
-            "$saveFileDialog.CheckPathExists=true;"^
-            "$saveFileDialog.RestoreDirectory=true;"^
-            "$saveFileDialog.ShowDialog();"^
-            "ECHO $saveFileDialog.FileName"^
-            "}"'
-        ) DO SET "TEMPPATH=%%F"
-        IF /i "!TEMPPATH!" EQU "Cancel" ( 
-            CHOICE /C YN /T 15 /D N /M "Did you mean to Cancel?"
-            @REM -- May have to revisit this early exit in future
-            IF !ERRORLEVEL! EQU 1 ( EXIT ) ELSE GOTO CHANGEMIRRORBACKUPLIST
-        )
-        SET "PATHMIRBACKUPLISTFILE=!TEMPPATH!"
-        ECHO ^|
-        ECHO "Mirror Backup List File set : !PATHMIRBACKUPLISTFILE!"
-        @REM -- Set PATHMIRBACKUPLISTFILE from full path/filename
-        @REM TODO ...
-        @REM -- Set MIRBACKUPLISTFILE from name
-        @REM TODO ...
-    )
-    @REM -- Make .env file and save env vars to it.
-    @REM TODO ...
-) 
-@REM ELSE (
-@REM     @REM -- Retreive env vars
-@REM     @REM TODO ...
-@REM     @REM FOR /F "delims== tokens=1,* eol=#" %%I IN ("!PATHENVFILE!") DO SET "%%I=%%J" & ECHO "%%I=%%J"
-@REM )
+    (   ECHO "BACKUPDESTNAME=!BACKUPDESTNAME!"
+        ECHO "BACKUPLISTFILE=backup_list.txt"
+        ECHO "MIRBACKUPLISTFILE=mirror_backup_list.txt"
+        ECHO "FILELOG=!BACKUPDESTNAME!.log"
+        ECHO "PATHLOGSDIR=!PATHINSTALLDIR!\logs"
+        ECHO "PATHBACKUPLISTFILE=!PATHINSTALLDIR!\!BACKUPLISTFILE!"
+        ECHO "PATHMIRBACKUPLISTFILE=!PATHINSTALLDIR!\!MIRBACKUPLISTFILE!"
+    ) > !PATHENVFILE!
+    TIMEOUT /s 5
+)
+@REM -- Set env vars from .env
+FOR /F "tokens=* eol=#" %%I IN (!PATHENVFILE!) DO SET %%I
+ECHO ^|
 @REM -- Create !INSTALLDIRNAME! folder in !USERPROFILE!\AppData\Local\Programs\ directory.
 IF NOT EXIST !PATHINSTALLDIR! (
     @REM -- User prompt
@@ -162,14 +101,27 @@ FOR /f "tokens=*" %%A IN ('TIME /t') DO SET "BACKUPTIME=%%A"
 ) > !LASTBACKUP!
 :SETDESTINATION
 ECHO ^|
-SET /P "USERDRIVEINPUT=Enter backup drive ( c | d | f | ... ) : "
+SET X=0
+SET "RESULT="
+FOR /f "delims=" %%N IN (
+    'POWERSHELL "&{"^
+    "Add-Type -AssemblyName System.Windows.Forms;"^
+    "$folderBrowserDialog=New-Object System.Windows.Forms.FolderBrowserDialog;"^
+    "$folderBrowserDialog.Description='Choose backup drive ( C | D | F | ... ).';"^
+    "$folderBrowserDialog.ShowDialog();"^
+    "ECHO $folderBrowserDialog.SelectedPath"^
+    "}"'
+) DO ( FOR %%O IN ("%%N") DO ( IF !X! EQU 1 ( SET "USERDRIVEINPUT=%%~dN" ) ELSE ( SET "RESULT=%%N" & SET /a X+=1 ) ) )
+IF /i "!RESULT!" EQU "Cancel" ( EXIT )
+ECHO !USERDRIVEINPUT!
+ECHO ^|
 @REM -- IF /? for help
-IF /I !USERDRIVEINPUT!==!HOMEDRIVE::=! ( ECHO Backup drive must not be same as source drive. & GOTO SETDESTINATION )
+IF /I !USERDRIVEINPUT!==!HOMEDRIVE! ( ECHO Backup drive must not be same as source drive. & GOTO SETDESTINATION )
 @REM -- Checking for drive existence
-IF NOT EXIST !USERDRIVEINPUT!:\ ( ECHO The system cannot find the path specified. & GOTO SETDESTINATION )
-SET "DESTINATION=!USERDRIVEINPUT!:\!BACKUPDESTNAME!"
+IF NOT EXIST !USERDRIVEINPUT! ( ECHO The system cannot find the path specified. & GOTO SETDESTINATION )
+SET "DESTINATION=!USERDRIVEINPUT!\!BACKUPDESTNAME!"
 @REM -- Checking for existing backup folder on backup drive. Create if not existing
-IF NOT EXIST !DESTINATION! ( MKDIR !DESTINATION! ) ELSE ( ECHO !DESTINATION!    Drive located. )
+IF NOT EXIST !DESTINATION! ( MKDIR !DESTINATION! ) ELSE ( ECHO !DESTINATION!    Backup located. )
 @REM -- FOR /? for help
 @REM -- ROBOCOPY /? for help
 FOR /f "delims=" %%B IN ('FINDSTR /V :: !PATHBACKUPLISTFILE!') DO (
@@ -204,38 +156,87 @@ IF !ERRORLEVEL! EQU 1 ( ECHO All files were copied successfully. & GOTO END )
 IF !ERRORLEVEL! EQU 0 ( ECHO "No files were copied. No failure was encountered. No files were mismatched. The files already exist in the destination directory; therefore, the copy operation was skipped." )
 GOTO END
 :MKBACKUPFILE
-@REM ************ Add choice for putting user chosen folders in file instead of hard coded ones ************
-@REM TODO ... 
+ECHO ^|
+CHOICE /C YN /T 15 /D N /M "Do you want to add custom paths to !BACKUPLISTFILE!? ('N'[Default Setup])"
+IF !ERRORLEVEL! EQU 1 (
+    SET "LISTBACKUPPATHS="
+    :ADDPATHSLOOP
+    SET X=0
+    FOR /f "delims=" %%L IN (
+        'POWERSHELL "&{"^
+        "Add-Type -AssemblyName System.Windows.Forms;"^
+        "$folderBrowserDialog=New-Object System.Windows.Forms.FolderBrowserDialog;"^
+        "$folderBrowserDialog.Description='Choose Folder to Copy.';"^
+        "$folderBrowserDialog.ShowDialog();"^
+        "ECHO $folderBrowserDialog.SelectedPath"^
+        "}"'
+    ) DO ( FOR %%M IN ("%%L") DO ( IF !X! EQU 1 ( SET "LISTBACKUPPATHS=!LISTBACKUPPATHS! %%M" ) ELSE ( SET /a X+=1 ) ) )
+    IF /i "!TEMPPATH!" EQU "Cancel" (
+        CHOICE /C YN /T 15 /D Y /M "Are you done adding folders?"
+        IF !ERRORLEVEL! EQU 1 ( GOTO DONEADDINGPATHS )
+    )
+    ECHO ^| & ECHO Current list of folders to backup. & ECHO ^|
+    FOR %%M IN (!LISTBACKUPPATHS!) DO ( ECHO %%~M )
+    ECHO ^|
+    CHOICE /C YN /T 15 /D N /M "Add another folder to list?"
+    IF !ERRORLEVEL! EQU 1 ( GOTO ADDPATHSLOOP )
+    :DONEADDINGPATHS
+    ECHO ^|
+) ELSE ( SET "LISTBACKUPPATHS=!USERPROFILE!\Music !USERPROFILE!\Pictures !USERPROFILE!\Videos" )
 (   ECHO :: ** List fully qualified paths you want backed up. **
+    ECHO ::
+    ECHO !PATHINSTALLDIR!
     ECHO ::
     ECHO :: ** LINES BEGINING WITH ":: " WILL NOT BE BACKED UP **
     ECHO ::
     ECHO :: ** Start your list below **
-    ECHO !PATHINSTALLDIR:"=!
-    ECHO !USERPROFILE!\Music
-    ECHO !USERPROFILE!\Pictures
-    ECHO !USERPROFILE!\Videos 
-) >> !PATHBACKUPLISTFILE!
+    ECHO ::
+) > !PATHBACKUPLISTFILE!
+FOR %%N IN (!LISTBACKUPPATHS!) DO ( ECHO %%~N >> !PATHBACKUPLISTFILE! )
 IF EXIST !PATHBACKUPLISTFILE! ( START notepad !PATHBACKUPLISTFILE! ) ELSE ( ECHO ^| & ECHO Could not create !PATHBACKUPLISTFILE!. )
 @REM ** Added for mirror backup
 :MKMIRBACKUPFILE
-@REM ************ Add choice for putting user chosen folders in file instead of hard coded ones ************
-@REM TODO ... 
 IF NOT EXIST !PATHMIRBACKUPLISTFILE! (
+    ECHO ^|
+    CHOICE /C YN /T 15 /D N /M "Do you want to add custom paths to !MIRBACKUPLISTFILE!? ('N'[Default Setup])"
+    IF !ERRORLEVEL! EQU 1 (
+        SET "LISTBACKUPPATHS="
+        :ADDPATHSLOOPMIR
+        SET X=0
+        FOR /f "delims=" %%L IN (
+            'POWERSHELL "&{"^
+            "Add-Type -AssemblyName System.Windows.Forms;"^
+            "$folderBrowserDialog=New-Object System.Windows.Forms.FolderBrowserDialog;"^
+            "$folderBrowserDialog.Description='Choose Folder to Copy (Mirrored).';"^
+            "$folderBrowserDialog.ShowDialog();"^
+            "ECHO $folderBrowserDialog.SelectedPath"^
+            "}"'
+        ) DO ( FOR %%M IN ("%%L") DO ( IF !X! EQU 1 ( SET "LISTBACKUPPATHS=!LISTBACKUPPATHS! %%M" ) ELSE ( SET /a X+=1 ) ) )
+        IF /i "!TEMPPATH!" EQU "Cancel" (
+            CHOICE /C YN /T 15 /D Y /M "Are you done adding folders?"
+            IF !ERRORLEVEL! EQU 1 ( GOTO DONEADDINGPATHSMIR )
+        )
+        ECHO ^| & ECHO Current list of folders to backup. & ECHO ^|
+        FOR %%M IN (!LISTBACKUPPATHS!) DO ( ECHO %%~M )
+        ECHO ^|
+        CHOICE /C YN /T 15 /D N /M "Add another folder to list?"
+        IF !ERRORLEVEL! EQU 1 ( GOTO ADDPATHSLOOPMIR )
+        :DONEADDINGPATHSMIR
+        ECHO ^|
+    ) ELSE ( SET "LISTBACKUPPATHS=!USERPROFILE!\AppData !USERPROFILE!\Desktop !USERPROFILE!\Downloads !USERPROFILE!\Documents" )
     (   ECHO :: ** List fully qualified paths you want backed up. **
+        ECHO ::
+        ECHO !PATHINSTALLDIR!
         ECHO ::
         ECHO :: ** LINES BEGINING WITH ":: " WILL NOT BE BACKED UP **
         ECHO ::
-        ECHO :: ** DESTINATION WILL BE MIRRORED TO SOURCE **
-        ECHO :: ** - Anything that gets deleted from computer will also be PERMANENTLY DELETED from backup **
+        ECHO :: ** DESTINATION WILL BE MIRRORED OF SOURCE **
+        ECHO :: ** - Anything that gets deleted from source will also be PERMANENTLY DELETED from backup destination **
         ECHO ::
         ECHO :: ** Start your list below **
-        ECHO !USERPROFILE!\AppData
-        ECHO !USERPROFILE!\Desktop
-        ECHO !USERPROFILE!\Downloads
-        ECHO !USERPROFILE!\Documents
-        ECHO !PATHINSTALLDIR:"=!
-    ) >> !PATHMIRBACKUPLISTFILE!
+        ECHO ::
+    ) > !PATHMIRBACKUPLISTFILE!
+    FOR %%N IN (!LISTBACKUPPATHS!) DO ( ECHO %%~N >> !PATHMIRBACKUPLISTFILE! )
     IF EXIST !PATHMIRBACKUPLISTFILE! ( START notepad !PATHMIRBACKUPLISTFILE! & EXIT ) ELSE ( ECHO ^| & ECHO Could not create !PATHMIRBACKUPLISTFILE!. )
 )
 :END
