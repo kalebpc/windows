@@ -15,14 +15,10 @@ FOR /f "delims=" %%A IN (
     "Add-Type -AssemblyName System.Windows.Forms;"^
     "$folderBrowserDialog=New-Object System.Windows.Forms.FolderBrowserDialog;"^
     "$folderBrowserDialog.Description='Choose Source Folder to Copy from.';"^
-    "$folderBrowserDialog.InitialDirectory=[Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile);"^
-    "$folderBrowserDialog.Filter='All files (*.*)|*.*';"^
-    "$folderBrowserDialog.FilterIndex=2;"^
-    "$folderBrowserDialog.RestoreDirectory=true;"^
     "$folderBrowserDialog.ShowDialog();"^
     "ECHO $folderBrowserDialog.SelectedPath"^
     "}"'
-) do set "PATHSOURCE=%%A"
+) DO SET "PATHSOURCE=%%A"
 IF /i "!PATHSOURCE!" EQU "Cancel" ( EXIT )
 ECHO Source folder : !PATHSOURCE!
 ECHO.
@@ -34,15 +30,11 @@ FOR /f "delims=" %%B IN (
     'POWERSHELL "&{"^
     "Add-Type -AssemblyName System.Windows.Forms;"^
     "$folderBrowserDialog=New-Object System.Windows.Forms.FolderBrowserDialog;"^
-    "$folderBrowserDialog.Description='Choose Source Folder to Copy from.';"^
-    "$folderBrowserDialog.InitialDirectory=[Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile);"^
-    "$folderBrowserDialog.Filter='All files (*.*)|*.*';"^
-    "$folderBrowserDialog.FilterIndex=2;"^
-    "$folderBrowserDialog.RestoreDirectory=true;"^
+    "$folderBrowserDialog.Description='Choose Destination Folder to Copy to.';"^
     "$folderBrowserDialog.ShowDialog();"^
     "ECHO $folderBrowserDialog.SelectedPath"^
     "}"'
-) do set "PATHDEST=%%B"
+) DO SET "PATHDEST=%%B"
 IF /i "!PATHDEST!" EQU "Cancel" ( EXIT )
 ECHO Destination folder : !PATHDEST!
 ECHO.
@@ -67,15 +59,11 @@ IF EXIST !PATHLOGSDIR! (
         'POWERSHELL "&{"^
         "Add-Type -AssemblyName System.Windows.Forms;"^
         "$folderBrowserDialog=New-Object System.Windows.Forms.FolderBrowserDialog;"^
-        "$folderBrowserDialog.Description='Choose Source Folder to Copy from.';"^
-        "$folderBrowserDialog.InitialDirectory=[Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile);"^
-        "$folderBrowserDialog.Filter='All files (*.*)|*.*';"^
-        "$folderBrowserDialog.FilterIndex=2;"^
-        "$folderBrowserDialog.RestoreDirectory=true;"^
+        "$folderBrowserDialog.Description='Choose Log Folder.';"^
         "$folderBrowserDialog.ShowDialog();"^
         "ECHO $folderBrowserDialog.SelectedPath"^
         "}"'
-    ) do set "PATHLOG=%%C"
+    ) DO SET "PATHLOG=%%C"
     IF /i "!PATHLOG!" EQU "Cancel" ( EXIT )
     ECHO Log folder : !PATHLOG!
     ECHO.
